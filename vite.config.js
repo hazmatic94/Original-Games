@@ -74,6 +74,26 @@ function repairIncompleteRouletteWheelBuild() {
   };
 }
 
+function bundleDesignSystemSoundAssets() {
+  return {
+    name: 'bundle-design-system-sound-assets',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!id.endsWith('/@joker/design-system/dist/utils/designSystemSoundAssets.js')) {
+        return null;
+      }
+
+      // Vite can only bundle `new URL()` assets when its first argument is a
+      // literal. The design-system helper hides that literal behind a function,
+      // leaving production chunks to resolve ../../assets at runtime.
+      return code.replace(
+        /designSystemSoundUrl\((['"])(\.\.\/\.\.\/assets\/[^'"]+)\1\)/g,
+        'new URL($1$2$1, import.meta.url).href',
+      );
+    },
+  };
+}
+
 function redirectMissingBaseSlash() {
   const baseWithoutSlash = appBase.replace(/\/$/, '');
 
@@ -101,6 +121,7 @@ function redirectMissingBaseSlash() {
 export default defineConfig({
   plugins: [
     react(),
+    bundleDesignSystemSoundAssets(),
     repairIncompleteRouletteWheelBuild(),
     redirectMissingBaseSlash(),
   ],
