@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GameShell, isValidFourDNumber, normalizeFourDNumber } from "@joker/design-system";
 import minesCashoutSound from "../../../assets/mines-cashout.mp3?url";
+import minesClickSound from "../../../assets/mines-click.mp3?url";
 import minesPlaceBetSound from "../../../assets/mines-placebet.mp3?url";
 import {
   GAME_ROUND_END_RESET_MS,
@@ -118,6 +119,10 @@ export function FourDMinesPage({ onGameChange }) {
     }
 
     const tileContent = getFourDTileContent(board[tile - 1]);
+
+    // Play directly from the click handler so browsers retain the user gesture,
+    // including when the game is running inside a cross-origin iframe.
+    playSound(minesClickSound);
 
     setRevealedTiles((currentTiles) =>
       currentTiles.includes(tile) ? currentTiles : [...currentTiles, tile]
