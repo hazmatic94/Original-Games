@@ -3,7 +3,9 @@ import {fileURLToPath} from 'node:url';
 import {defineConfig} from 'vitest/config';
 
 const appBase = '/showroom/gameshell/';
-const designSystemRoot = fileURLToPath(new URL('../DesignSystemGames', import.meta.url));
+const designSystemRoot = fileURLToPath(
+  new URL('./node_modules/@joker/design-system', import.meta.url),
+);
 
 function repairIncompleteRouletteWheelBuild() {
   const wrapperReplacement = '\0joker:RouletteWrapper';
@@ -165,9 +167,7 @@ export default defineConfig({
       },
       {
         find: '../EnterBetPrecursor/index.js',
-        replacement: fileURLToPath(
-          new URL('../DesignSystemGames/dist/components/EnterBetPrecursor/index.js', import.meta.url),
-        ),
+        replacement: `${designSystemRoot}/dist/components/EnterBetPrecursor/index.js`,
       },
     ],
   },
