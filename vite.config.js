@@ -3,6 +3,9 @@ import {fileURLToPath} from 'node:url';
 import {defineConfig} from 'vitest/config';
 
 const appBase = '/showroom/gameshell/';
+const designSystemRoot = fileURLToPath(
+  new URL('./node_modules/@joker/design-system', import.meta.url),
+);
 
 function repairIncompleteRouletteWheelBuild() {
   const wrapperReplacement = '\0joker:RouletteWrapper';
@@ -149,13 +152,23 @@ export default defineConfig({
     exclude: ['@joker/design-system'],
   },
   resolve: {
-    alias: {
-      '../EnterBetPrecursor/index.js': fileURLToPath(
-        new URL(
-          './node_modules/@joker/design-system/dist/components/EnterBetPrecursor/index.js',
-          import.meta.url,
-        ),
-      ),
-    },
+    alias: [
+      {
+        find: '@joker/design-system/styles.css',
+        replacement: `${designSystemRoot}/src/styles/index.css`,
+      },
+      {
+        find: /^@joker\/design-system\/styles\/(.+)$/,
+        replacement: `${designSystemRoot}/src/styles/$1`,
+      },
+      {
+        find: '@joker/design-system',
+        replacement: `${designSystemRoot}/dist/index.js`,
+      },
+      {
+        find: '../EnterBetPrecursor/index.js',
+        replacement: `${designSystemRoot}/dist/components/EnterBetPrecursor/index.js`,
+      },
+    ],
   },
 });
