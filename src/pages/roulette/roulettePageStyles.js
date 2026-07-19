@@ -41,6 +41,7 @@ export function getRoulettePageStyles(gameRoundEndStyles) {
     );
     --roulette-celebration-bleed-top: 96px;
     --roulette-win-streak-layer: 8;
+    --roulette-mobile-odds-layer: 20;
   }
 
   .joker-roulette-game-frame__stage {
@@ -294,7 +295,7 @@ export function getRoulettePageStyles(gameRoundEndStyles) {
     pointer-events: auto;
   }
 
-  @media (min-width: 1024px) {
+  @media (min-width: 1000px) {
     .joker-roulette-game-frame__top {
       position: relative;
       flex: 0 0 auto;
@@ -334,7 +335,7 @@ export function getRoulettePageStyles(gameRoundEndStyles) {
     }
   }
 
-  @media (max-width: 1023px) {
+  @media (max-width: 999px) {
     .joker-game-shell--roulette .joker-navigation-mobile-content .joker-game-shell-empty-stage {
       overflow: hidden;
     }
@@ -360,7 +361,7 @@ export function getRoulettePageStyles(gameRoundEndStyles) {
       height: var(--roulette-mobile-top-band-height);
       min-height: var(--roulette-mobile-top-band-height);
       max-height: var(--roulette-mobile-top-band-height);
-      padding: var(--spacing-24) 0 0 var(--spacing-24);
+      padding: 0 0 0 var(--spacing-24);
       gap: 0;
       box-sizing: border-box;
       overflow: hidden;
@@ -372,12 +373,16 @@ export function getRoulettePageStyles(gameRoundEndStyles) {
 
     .joker-roulette-streak-rail {
       z-index: 1;
-      flex: 1 1 auto;
+      flex: 0 0 auto;
       min-height: 0;
       align-items: flex-start;
       justify-content: flex-start;
       padding-block: 0;
       padding-inline: 0;
+    }
+
+    .joker-roulette-streak-rail .joker-win-streak-row {
+      margin-top: var(--spacing-24);
     }
 
     .joker-roulette-streak-track {
@@ -391,27 +396,44 @@ export function getRoulettePageStyles(gameRoundEndStyles) {
       box-sizing: border-box;
     }
 
-    .joker-roulette-mobile-odds {
+    .joker-roulette-game-frame__stage {
       position: relative;
-      flex: 0 0 auto;
-      left: auto;
-      right: auto;
-      bottom: auto;
+      z-index: 7;
+    }
+
+    .joker-roulette-mobile-odds {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
       width: 100%;
       max-width: none;
-      margin-top: 0;
+      margin: 0;
       padding: var(--spacing-4) var(--spacing-24) var(--spacing-16);
       box-sizing: border-box;
-      z-index: 4;
-      pointer-events: auto;
+      z-index: var(--roulette-mobile-odds-layer);
+      pointer-events: none;
+      background: none;
+    }
+
+    .joker-roulette-mobile-odds .joker-mobile-odds-group,
+    .joker-roulette-mobile-odds .joker-mobile-roulette-odds-group,
+    .joker-roulette-mobile-odds .joker-odds-button-group {
+      background: none;
     }
 
     .joker-roulette-mobile-odds .joker-odds-button-group.is-inline {
       gap: var(--spacing-8);
+      pointer-events: auto;
     }
 
-    .joker-roulette-wheel-edge-fade:not(.joker-roulette-wheel-edge-fade--bottom) {
+    .joker-roulette-game-frame .joker-roulette-wheel-edge-fade:not(.joker-roulette-wheel-edge-fade--bottom) {
+      display: none;
+    }
+
+    .joker-roulette-game-frame .joker-roulette-wheel-edge-fade--bottom {
       display: block;
+      z-index: 5;
     }
   }
 ${gameRoundEndStyles}
