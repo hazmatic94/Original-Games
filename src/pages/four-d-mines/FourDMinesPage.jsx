@@ -1,17 +1,28 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { GameShell, isValidFourDNumber, normalizeFourDNumber } from "@joker/design-system";
+import {
+  BettingPanelSurface,
+  FourDMinesInGameCard,
+  FourDNumberInput,
+  GameShell,
+  isValidFourDNumber,
+  MinesInGameOverlay,
+  normalizeFourDNumber,
+  Select,
+} from "@joker/design-system";
+import "@joker/design-system/styles/button.css";
+import "@joker/design-system/styles/inputs.css";
+import dynamiteIconSrc from "../../../assets/mines-bomb.png?url";
 import minesCashoutSound from "../../../assets/mines-cashout.mp3?url";
 import minesPlaceBetSound from "../../../assets/mines-placebet.mp3?url";
 import {
   GAME_ROUND_END_RESET_MS,
   GAME_ROUND_END_STYLES,
 } from "../../shared/gameRoundEnd.jsx";
-import { formatBalance } from "../../shared/formatting.js";
+import { formatBalance, formatCurrency } from "../../shared/formatting.js";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout, useOpenGameMenu } from "../../shared/hooks.js";
 import { playSound } from "../../shared/sounds.js";
 import { calculateMultiplier } from "../mines/minesGameLogic.jsx";
 import { FourDMinesGrid } from "./FourDMinesGrid.jsx";
-import { PackagedFourDMinesBettingPanel } from "./PackagedFourDMinesBettingPanel.jsx";
 import {
   desktopFourDMinesGrid,
   fourDMinesNavigationPreset,
@@ -30,6 +41,12 @@ import {
 } from "./fourDMinesGameLogic.js";
 import { getFourDMinesPageStyles } from "./fourDMinesPageStyles.js";
 
+const dynamiteIcon = <img className="joker-dynamite-icon" src={dynamiteIconSrc} alt="" />;
+
+function formatMinesAmountLabel(count) {
+  return `${count} ${count === 1 ? "Mine" : "Mines"}`;
+}
+
 export function FourDMinesPage({ onGameChange }) {
   const bettingPanelLayout = useGameShellBettingPanelLayout();
   const fourDMinesGrid = bettingPanelLayout === "mobile" ? mobileFourDMinesGrid : desktopFourDMinesGrid;
@@ -37,7 +54,6 @@ export function FourDMinesPage({ onGameChange }) {
   const mineTiles = useMemo(() => createFourDMineTiles(fourDMinesTileCount), []);
   const [betAmount, setBetAmount] = useState("");
   const [fourDNumber, setFourDNumber] = useState("");
-  const [bettingPanelKey, setBettingPanelKey] = useState(0);
   const [activeFourDNumber, setActiveFourDNumber] = useState("");
   const [balance, setBalance] = useState(150000);
   const { deferWinCredit, applyDeferredWinCredit } = useDeferredWinCredit(setBalance);
@@ -93,7 +109,6 @@ export function FourDMinesPage({ onGameChange }) {
     setLossResult(false);
     setMessage("");
     setFourDNumber("");
-    setBettingPanelKey((currentKey) => currentKey + 1);
     setActiveFourDNumber("");
     resultResetTimeout.current = null;
   }
@@ -194,6 +209,28 @@ export function FourDMinesPage({ onGameChange }) {
     setMessage("");
   }
 
+  function handleBetAmountChange(event) {
+    setBetAmount(event.currentTarget.value.replace(/[^\d.]/g, ""));
+  }
+
+  function handleMinesAmountChange(nextValue) {
+    setMines(String(clampFourDMinesAmount(nextValue)));
+  }
+
+  function handleFourDNumberChange(nextValue) {
+    setFourDNumber(normalizeFourDNumber(nextValue));
+  }
+
+  const isMobileBettingPanel = bettingPanelLayout === "mobile";
+  const fourDMinesInGameCard = (
+    <FourDMinesInGameCard
+      currentProfit={formatCurrency(currentProfit)}
+      nextValue={formatCurrency(nextProfit)}
+      currentMultiplier={`${multiplier.toFixed(2)}x`}
+      nextMultiplier={`${nextMultiplier.toFixed(2)}x`}
+    />
+  );
+
   return (
     <>
       <style>{getFourDMinesPageStyles(GAME_ROUND_END_STYLES)}</style>
@@ -205,22 +242,66 @@ export function FourDMinesPage({ onGameChange }) {
         onValueChange={onGameChange}
         value={fourDMinesNavigationPreset.selectedValue}
         bettingPanel={
-          <PackagedFourDMinesBettingPanel
-            key={bettingPanelKey}
-            betAmount={betAmount}
-            currentProfit={currentProfit}
-            gameInPlay={gameInPlay}
-            layout={bettingPanelLayout}
-            mines={mines}
-            minesAmountOptions={fourDMinesAmountOptions}
-            multiplier={multiplier}
-            nextMultiplier={nextMultiplier}
-            nextProfit={nextProfit}
-            onBetAmountChange={setBetAmount}
-            onFourDNumberChange={setFourDNumber}
-            onMinesChange={setMines}
-            onPlaceBet={handleBetAction}
-          />
+          <div
+            className={
+              gameInPlay && !isMobileBettingPanel
+                ? "joker-4d-mines-betting-panel-host is-ingame"
+                : "joker-4d-mines-betting-panel-host"
+            }
+          >
+            <BettingPanelSurface
+              ariaLabel={
+                isMobileBettingPanel
+                  ? "4D Mines mobile betting panel"
+                  : "4D Mines betting panel"
+              }
+              className="joker-4d-mines-betting-panel"
+              layout={bettingPanelLayout}
+              betAmount={betAmount}
+              onBetAmountChange={handleBetAmountChange}
+              onPlaceBet={handleBetAction}
+              inGame={gameInPlay}
+              disablePlaceBetUntilBetAmount
+              footer={
+                gameInPlay && isMobileBettingPanel ? (
+                  <MinesInGameOverlay layout={bettingPanelLayout} onCashout={handleBetAction}>
+                    {fourDMinesInGameCard}
+                  </MinesInGameOverlay>
+                ) : undefined
+              }
+            >
+              <div className="joker-4d-mines-betting-field-group joker-betting-field-group">
+                <FourDNumberInput
+                  className="joker-bet-field"
+                  value={fourDNumber}
+                  onChange={handleFourDNumberChange}
+                  onValueChange={handleFourDNumberChange}
+                />
+                <Select
+                  className="joker-bet-field joker-dynamite-input"
+                  fullWidth
+                  label="Dynamite"
+                  leftIcon={dynamiteIcon}
+                  options={fourDMinesAmountOptions}
+                  value={mines}
+                  onChange={handleMinesAmountChange}
+                  renderValue={(option) => {
+                    const count = Number.parseInt(option?.value ?? mines, 10);
+                    return Number.isFinite(count) ? formatMinesAmountLabel(count) : option?.label;
+                  }}
+                />
+              </div>
+            </BettingPanelSurface>
+            {gameInPlay && !isMobileBettingPanel ? (
+              <MinesInGameOverlay
+                className="joker-4d-mines-betting-panel-overlay"
+                layout={bettingPanelLayout}
+                onCashout={handleBetAction}
+              >
+                {fourDMinesInGameCard}
+              </MinesInGameOverlay>
+            ) : null}
+          </div>
         }
       >
         <FourDMinesGrid

@@ -15,6 +15,20 @@ export function getFourDMinesPageStyles(gameRoundEndStyles) {
   }
 }
 
+.joker-4d-mines-betting-panel-host {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+}
+
+.joker-4d-mines-betting-panel-host.is-ingame .joker-4d-mines-betting-panel-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .joker-mines-board-area {
   --mines-board-padding: 32px;
   --mines-grid-gap: var(--spacing-8);
