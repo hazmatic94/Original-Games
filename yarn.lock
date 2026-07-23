@@ -166,7 +166,7 @@
   integrity sha512-N3zl+lxHCifgIlcMUP5016ESkeQjLj/959RxxNYIthIg+CQHInujFuXeWbWMgnTo4cp5XVHqFPmpyu9J65C1Yg==
 
 "@joker/design-system@file:../DesignSystemGames":
-  version "0.1.62"
+  version "0.1.67"
   resolved "file:../DesignSystemGames"
 
 "@jridgewell/gen-mapping@^0.3.12", "@jridgewell/gen-mapping@^0.3.5":
