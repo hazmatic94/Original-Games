@@ -14,6 +14,11 @@ export function getHiloPageStyles(gameRoundEndStyles) {
   justify-self: stretch;
 }
 
+.joker-hilo-betting-panel-host {
+  height: 100%;
+  min-height: 0;
+}
+
 .joker-hilo-betting-panel.is-hilo-pre-game .joker-hilo-betting-actions {
   cursor: not-allowed;
 }
@@ -35,6 +40,16 @@ export function getHiloPageStyles(gameRoundEndStyles) {
 
 .joker-hilo-betting-panel .joker-hilo-betting-actions .joker-hi-lo-odds {
   gap: var(--spacing-8);
+}
+
+.joker-hilo-betting-panel .joker-odds-button-group button:disabled {
+  border-color: var(--button-hi-lo-border);
+  background: var(--button-hi-lo-bg);
+  box-shadow: none;
+  color: var(--button-hi-lo-text);
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
 }
 
 @media (min-width: 1000px) {
@@ -1110,7 +1125,6 @@ export function getHiloPageStyles(gameRoundEndStyles) {
 
   .joker-hilo-mobile-odds .joker-odds-button-group.is-inline {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--spacing-8);
   }
 
   .joker-hilo-mobile-odds button {

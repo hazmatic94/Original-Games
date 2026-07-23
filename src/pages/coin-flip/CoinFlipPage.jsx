@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
+  BettingPanelSurface,
   Coin,
   CoinProgression,
   GameShell,
+  InGameDualActionFooter,
+  OddsButtonGroup,
+  RoundsToWinInput,
   WinModalCard,
   getCoinReceiverLossTotalMs,
 } from "@joker/design-system";
+import "@joker/design-system/styles/button.css";
+import "@joker/design-system/styles/inputs.css";
 import minesCashoutSound from "../../../assets/mines-cashout.mp3?url";
 import {
   GAME_ROUND_END_STYLES,
@@ -15,7 +21,6 @@ import { formatBalance, formatJkcAmount } from "../../shared/formatting.js";
 import { useGameShellBettingPanelLayout } from "../../shared/hooks.js";
 import { playSound } from "../../shared/sounds.js";
 import { MobileOddsGroup } from "./MobileOddsGroup.jsx";
-import { PackagedCoinFlipBettingPanel } from "./PackagedCoinFlipBettingPanel.jsx";
 import {
   COIN_FLIP_PAGE_LOAD_ANIMATION_MS,
   COIN_FLIP_PROGRESSION_COIN_SIZE,
@@ -390,6 +395,59 @@ export function CoinFlipPage({ onGameChange }) {
     runCoinFlipAnimation();
   }, [canFlipCoin, hasActiveCoinRound, tossPhase]);
 
+  const isMobileBettingPanel = bettingPanelLayout === "mobile";
+  const oddsOptions = getCoinFlipOddsOptions(betAmount, roundsToWin);
+  const oddsDisabled = !hasActiveCoinRound && !hasCoinBetAmount;
+  const roundsDisabled = oddsDisabled;
+  const displayedOddsValue = hasActiveCoinRound
+    ? selectedSide || "heads"
+    : hasCoinBetAmount
+      ? selectedSide
+      : "";
+  const panelClassName = [
+    "joker-coin-flip-betting-panel",
+    isCoinFlipping ? "is-coin-flipping" : "",
+    isRoundLocked ? "is-round-locked" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  function handleBetAmountInputChange(event) {
+    if (isRoundLocked) return;
+
+    setBetAmount(event.currentTarget.value.replace(/\D/g, ""));
+  }
+
+  function handleOddsValueChange(value) {
+    if (isCoinFlipping) return;
+
+    handleCoinSideChange(value);
+  }
+
+  function handleRoundsToWinInputChange(value) {
+    if (isRoundLocked) return;
+
+    setRoundsToWin(value);
+  }
+
+  function handlePlaceBetClick() {
+    if (isCoinFlipping) return;
+
+    handleBetAction();
+  }
+
+  function handleFooterFlipCoin() {
+    if (isCoinFlipping) return;
+
+    flipCoin();
+  }
+
+  function handleFooterCashout() {
+    if (isCoinFlipping) return;
+
+    handleCoinCashout();
+  }
+
   return (
     <>
       <style>{getCoinFlipPageStyles(GAME_ROUND_END_STYLES)}</style>
@@ -401,23 +459,55 @@ export function CoinFlipPage({ onGameChange }) {
         onValueChange={onGameChange}
         value={coinFlipNavigationPreset.selectedValue}
         bettingPanel={
-          <PackagedCoinFlipBettingPanel
-            betAmount={betAmount}
-            inGame={hasActiveCoinRound}
-            isFlipping={isCoinFlipping}
+          <BettingPanelSurface
+            ariaLabel={
+              isMobileBettingPanel ? "Coin Flip mobile betting panel" : "Coin Flip betting panel"
+            }
+            className={panelClassName}
             layout={bettingPanelLayout}
-            onBetAmountChange={setBetAmount}
-            onCashout={handleCoinCashout}
-            onFlipCoin={flipCoin}
-            onPlaceBet={handleBetAction}
-            onSideChange={handleCoinSideChange}
-            onRoundsToWinChange={setRoundsToWin}
-            oddsOptions={getCoinFlipOddsOptions(betAmount, roundsToWin)}
-            roundLocked={isRoundLocked}
-            roundsToWinValue={roundsToWin}
-            defaultRoundsToWinValue="4"
-            selectedSide={selectedSide}
-          />
+            betAmount={betAmount}
+            onBetAmountChange={handleBetAmountInputChange}
+            onPlaceBet={handlePlaceBetClick}
+            submitLabel="Flip Coin"
+            disablePlaceBetUntilBetAmount
+            footer={
+              hasActiveCoinRound ? (
+                <InGameDualActionFooter
+                  className="joker-coin-flip-betting-ingame-submit"
+                  cashoutLabel="Cashout"
+                  primaryLabel="Flip Coin"
+                  onCashout={handleFooterCashout}
+                  onPrimaryAction={handleFooterFlipCoin}
+                />
+              ) : undefined
+            }
+          >
+            <div className="joker-coin-flip-betting-actions joker-betting-field-group">
+              {isMobileBettingPanel ? (
+                <MobileOddsGroup
+                  options={oddsOptions}
+                  value={displayedOddsValue}
+                  onValueChange={handleOddsValueChange}
+                  disabled={oddsDisabled}
+                />
+              ) : (
+                <OddsButtonGroup
+                  options={oddsOptions}
+                  value={displayedOddsValue}
+                  onValueChange={handleOddsValueChange}
+                  layout="stacked"
+                  showOdds
+                  disabled={oddsDisabled}
+                  ariaLabel="Coin flip choice"
+                />
+              )}
+              <RoundsToWinInput
+                value={roundsToWin}
+                disabled={roundsDisabled}
+                onChange={handleRoundsToWinInputChange}
+              />
+            </div>
+          </BettingPanelSurface>
         }
       >
         <section className="joker-coin-flip-stage" aria-label="Coin Flip game board">

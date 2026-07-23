@@ -392,6 +392,16 @@ export function getCoinFlipPageStyles(gameRoundEndStyles) {
   transition: opacity 220ms ease;
 }
 
+.joker-coin-flip-betting-panel .joker-odds-button-group button:disabled {
+  border-color: var(--button-hi-lo-border);
+  background: var(--button-hi-lo-bg);
+  box-shadow: none;
+  color: var(--button-hi-lo-text);
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .joker-coin-flip-betting-panel.is-round-locked .joker-rounds-to-win-field,
 .joker-coin-flip-betting-panel.is-round-locked .joker-bet-field {
   opacity: 0.45;

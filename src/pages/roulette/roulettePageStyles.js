@@ -16,6 +16,16 @@ export function getRoulettePageStyles(gameRoundEndStyles) {
     min-height: 0;
   }
 
+  .joker-roulette-betting-panel .joker-odds-button-group button:disabled {
+    border-color: var(--button-hi-lo-border);
+    background: var(--button-hi-lo-bg);
+    box-shadow: none;
+    color: var(--button-hi-lo-text);
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
   .joker-roulette-game-frame {
     position: relative;
     display: flex;

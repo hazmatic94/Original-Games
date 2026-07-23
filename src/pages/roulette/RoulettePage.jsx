@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import {
+  BettingPanelSurface,
   GameShell,
+  InGameDualActionFooter,
   MobileRouletteOddsGroup,
+  OddsButtonGroup,
   RouletteGameHeaderRail,
   WinModalCard,
   getPocketColor,
+  playButtonClickSound,
 } from "@joker/design-system";
+import "@joker/design-system/styles/button.css";
+import "@joker/design-system/styles/inputs.css";
 import minesCashoutSound from "../../../assets/mines-cashout.mp3?url";
 import {
   GAME_ROUND_END_STYLES,
@@ -15,7 +21,6 @@ import {
 import { formatBalance, formatCurrency } from "../../shared/formatting.js";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
 import { playSound } from "../../shared/sounds.js";
-import { PackagedRouletteBettingPanel } from "./PackagedRouletteBettingPanel.jsx";
 import { RouletteGameAreaSlot } from "./RouletteGameAreaSlot.jsx";
 import { RouletteStreakChip } from "./RouletteStreakChip.jsx";
 import {
@@ -82,12 +87,17 @@ export function RoulettePage({ onGameChange }) {
     !spinLocked &&
     !rouletteWinModal;
   const rouletteOddsOptions = useMemo(
-    () =>
-      hasDisplayBetAmount
-        ? getRouletteOddsOptions(displayBetAmount, streakWins.length)
-        : undefined,
-    [displayBetAmount, hasDisplayBetAmount, streakWins.length],
+    () => getRouletteOddsOptions(displayBetAmount, streakWins.length),
+    [displayBetAmount, streakWins.length],
   );
+  const isMobileBettingPanel = bettingPanelLayout === "mobile";
+  const oddsDisabled = !inGame && !hasDisplayBetAmount;
+  const displayedOddsValue = inGame
+    ? selectedOdds || "red"
+    : hasDisplayBetAmount
+      ? selectedOdds
+      : "";
+  const panelClassName = "joker-roulette-betting-panel";
 
   const handleWheelSpinningChange = useCallback((wheelIsSpinning) => {
     setIsWheelSpinning(wheelIsSpinning);
@@ -308,6 +318,46 @@ export function RoulettePage({ onGameChange }) {
     setSelectedOdds(value);
   }
 
+  function handleBetAmountInputChange(event) {
+    if (inGame || spinLocked) {
+      return;
+    }
+
+    setBetAmount(event.currentTarget.value.replace(/\D/g, ""));
+  }
+
+  function handlePlaceBetClick() {
+    if (spinLocked) {
+      return;
+    }
+
+    playButtonClickSound();
+    if (inGame) {
+      handleContinueSpin();
+      return;
+    }
+
+    handlePlaceBet();
+  }
+
+  function handleFooterSpin() {
+    if (spinLocked) {
+      return;
+    }
+
+    playButtonClickSound();
+    handleContinueSpin();
+  }
+
+  function handleFooterCashout() {
+    if (spinLocked) {
+      return;
+    }
+
+    playButtonClickSound();
+    handleRouletteCashout();
+  }
+
   return (
     <>
       <style>{getRoulettePageStyles(GAME_ROUND_END_STYLES)}</style>
@@ -320,18 +370,52 @@ export function RoulettePage({ onGameChange }) {
         onValueChange={onGameChange}
         value={rouletteNavigationPreset.selectedValue}
         bettingPanel={
-          <PackagedRouletteBettingPanel
-            betAmount={displayBetAmount}
-            inGame={inGame}
-            isSpinning={spinLocked}
+          <BettingPanelSurface
+            ariaLabel={
+              isMobileBettingPanel ? "Roulette mobile betting panel" : "Roulette betting panel"
+            }
+            className={panelClassName}
             layout={bettingPanelLayout}
-            oddsOptions={rouletteOddsOptions}
-            onBetAmountChange={setBetAmount}
-            onCashout={handleRouletteCashout}
-            onOddsChange={handleOddsChange}
-            onPlaceBet={inGame ? handleContinueSpin : handlePlaceBet}
-            selectedOdds={selectedOdds}
-          />
+            betAmount={displayBetAmount}
+            onBetAmountChange={handleBetAmountInputChange}
+            onPlaceBet={handlePlaceBetClick}
+            submitLabel="Spin Wheel"
+            disablePlaceBetUntilBetAmount
+            footer={
+              inGame ? (
+                <InGameDualActionFooter
+                  className="joker-roulette-betting-ingame-submit"
+                  cashoutLabel="Cashout"
+                  primaryLabel="Spin Again"
+                  onCashout={handleFooterCashout}
+                  onPrimaryAction={handleFooterSpin}
+                />
+              ) : undefined
+            }
+          >
+            <div className="joker-roulette-betting-actions joker-betting-field-group">
+              {isMobileBettingPanel ? (
+                <MobileRouletteOddsGroup
+                  options={rouletteOddsOptions}
+                  value={displayedOddsValue}
+                  onValueChange={handleOddsChange}
+                  disabled={oddsDisabled}
+                />
+              ) : (
+                <OddsButtonGroup
+                  label="Bet type"
+                  options={rouletteOddsOptions}
+                  value={displayedOddsValue}
+                  onValueChange={handleOddsChange}
+                  layout="stacked"
+                  showOdds={false}
+                  showDirection={false}
+                  disabled={oddsDisabled}
+                  ariaLabel="Roulette bet choice"
+                />
+              )}
+            </div>
+          </BettingPanelSurface>
         }
       >
         <div

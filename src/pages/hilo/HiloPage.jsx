@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { GameShell } from "@joker/design-system";
+import {
+  BettingPanelSurface,
+  Button,
+  CashoutFooter,
+  GameShell,
+  MobileHiLoOddsGroup,
+  OddsButtonGroup,
+} from "@joker/design-system";
+import "@joker/design-system/styles/button.css";
+import "@joker/design-system/styles/inputs.css";
 import hiloCardDrawSound from "../../../assets/hilo-card-draw.mp3?url";
 import hiloNextSound from "../../../assets/hilo-next.mp3?url";
 import minesBombSound from "../../../assets/mines-bomb.mp3?url";
@@ -13,7 +22,6 @@ import { formatBalance } from "../../shared/formatting.js";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout, useOpenGameMenu } from "../../shared/hooks.js";
 import { playSound } from "../../shared/sounds.js";
 import { HiloStage } from "./HiloStage.jsx";
-import { PackagedHiloBettingPanel } from "./PackagedHiloBettingPanel.jsx";
 import { hiloNavigationPreset } from "./hiloConfig.js";
 import {
   calculateHiloOdds,
@@ -150,6 +158,10 @@ export function HiloPage({ onGameChange }) {
     if (!Number(nextValue)) {
       setPendingPrediction("");
     }
+  }
+
+  function handleBetAmountInputChange(event) {
+    handleBetAmountChange(event.currentTarget.value.replace(/[^\d.]/g, ""));
   }
 
   function handleHiloChoiceSelection(choice) {
@@ -326,6 +338,18 @@ export function HiloPage({ onGameChange }) {
     }
   }
 
+  const isMobileBettingPanel = bettingPanelLayout === "mobile";
+  const awaitingHiloChoice = !gameInPlay && hasBetAmount && !pendingPrediction;
+  const oddsDisabled = !gameInPlay && !isMobileBettingPanel && !hasBetAmount;
+  const panelClassName = [
+    "joker-hilo-betting-panel",
+    !gameInPlay ? "is-hilo-pre-game" : "",
+    !gameInPlay && hasBetAmount ? "is-hilo-pre-game-ready" : "",
+    awaitingHiloChoice ? "is-awaiting-hilo-choice" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <>
       <style>{getHiloPageStyles(GAME_ROUND_END_STYLES)}</style>
@@ -337,23 +361,73 @@ export function HiloPage({ onGameChange }) {
         onValueChange={onGameChange}
         value={hiloNavigationPreset.selectedValue}
         bettingPanel={
-          <PackagedHiloBettingPanel
-            awaitingHiloChoice={!gameInPlay && hasBetAmount && !pendingPrediction}
-            betAmount={betAmount}
-            gameInPlay={gameInPlay}
-            hasBetAmount={hasBetAmount}
-            higherOdds={formatHiloPercent(displayOdds.higherPercent)}
-            layout={bettingPanelLayout}
-            lowerOdds={formatHiloPercent(displayOdds.lowerPercent)}
-            onBetAmountChange={handleBetAmountChange}
-            onCashout={handleCashout}
-            onPlaceBet={handlePlaceBet}
-            onHigherSame={() => handleHiloChoiceSelection("higher")}
-            onLowerSame={() => handleHiloChoiceSelection("lower")}
-            onSkipCard={handleSkipCard}
-            selectedOddsValue={pendingPrediction}
-            skipAvailable={skipAvailable}
-          />
+          <div className="joker-hilo-betting-panel-host">
+            <BettingPanelSurface
+              ariaLabel={
+                isMobileBettingPanel ? "HiLo mobile betting panel" : "HiLo betting panel"
+              }
+              className={panelClassName}
+              layout={bettingPanelLayout}
+              betAmount={betAmount}
+              onBetAmountChange={handleBetAmountInputChange}
+              onPlaceBet={handlePlaceBet}
+              disablePlaceBetUntilBetAmount
+              footer={
+                gameInPlay ? <CashoutFooter onCashout={handleCashout} /> : undefined
+              }
+            >
+              {isMobileBettingPanel ? (
+                <MobileHiLoOddsGroup
+                  className="joker-hilo-betting-actions"
+                  disabled={oddsDisabled}
+                  lowerOdds={formatHiloPercent(displayOdds.lowerPercent)}
+                  higherOdds={formatHiloPercent(displayOdds.higherPercent)}
+                  onLowerSame={() => handleHiloChoiceSelection("lower")}
+                  onHigherSame={() => handleHiloChoiceSelection("higher")}
+                  onValueChange={setPendingPrediction}
+                  value={pendingPrediction}
+                />
+              ) : (
+                <OddsButtonGroup
+                  className="joker-hilo-betting-actions"
+                  ariaLabel="HiLo choice"
+                  layout="stacked"
+                  showOdds={false}
+                  showDirection
+                  value={pendingPrediction}
+                  onValueChange={setPendingPrediction}
+                  disabled={oddsDisabled}
+                  options={[
+                    {
+                      value: "lower",
+                      label: "Lower / Same",
+                      odds: formatHiloPercent(displayOdds.lowerPercent),
+                      direction: "down",
+                      onClick: () => handleHiloChoiceSelection("lower"),
+                    },
+                    {
+                      value: "higher",
+                      label: "Higher / Same",
+                      odds: formatHiloPercent(displayOdds.higherPercent),
+                      direction: "up",
+                      onClick: () => handleHiloChoiceSelection("higher"),
+                    },
+                  ]}
+                />
+              )}
+
+              {gameInPlay ? (
+                <Button
+                  variant="secondary"
+                  fullWidth
+                  className="joker-cta-preview secondary full-width"
+                  onClick={handleSkipCard}
+                >
+                  {skipAvailable ? "Skip Card" : "Skip Used"}
+                </Button>
+              ) : null}
+            </BettingPanelSurface>
+          </div>
         }
       >
         <HiloStage
