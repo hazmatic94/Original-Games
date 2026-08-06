@@ -3,7 +3,7 @@ import {fileURLToPath} from 'node:url';
 import {defineConfig} from 'vitest/config';
 
 const appBase = '/showroom/gameshell/';
-const designSystemRoot = fileURLToPath(new URL('../DesignSystemGames', import.meta.url));
+const designSystemRoot = fileURLToPath(new URL('../DesignSystemJokerShowroom', import.meta.url));
 
 function repairIncompleteRouletteWheelBuild() {
   const wrapperReplacement = '\0joker:RouletteWrapper';
@@ -83,11 +83,17 @@ function redirectMissingBaseSlash() {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const url = req.url?.split('?')[0] ?? '';
+        const query = req.url?.includes('?')
+          ? req.url.slice(req.url.indexOf('?'))
+          : '';
+
+        if (url === '/' || url === '') {
+          res.writeHead(301, { Location: `${appBase}${query}` });
+          res.end();
+          return;
+        }
 
         if (url === baseWithoutSlash) {
-          const query = req.url?.includes('?')
-            ? req.url.slice(req.url.indexOf('?'))
-            : '';
           res.writeHead(301, {Location: `${appBase}${query}`});
           res.end();
           return;
@@ -119,7 +125,7 @@ export default defineConfig({
     host: true,
     allowedHosts: true,
     watch: {
-      ignored: ['!**/DesignSystemGames/**'],
+      ignored: ['!**/DesignSystemJokerShowroom/**'],
     },
     fs: {
       allow: ['..'],
@@ -145,7 +151,7 @@ export default defineConfig({
       {
         find: '../EnterBetPrecursor/index.js',
         replacement: fileURLToPath(
-          new URL('../DesignSystemGames/dist/components/EnterBetPrecursor/index.js', import.meta.url),
+          new URL('../DesignSystemJokerShowroom/dist/components/EnterBetPrecursor/index.js', import.meta.url),
         ),
       },
     ],
