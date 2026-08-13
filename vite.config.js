@@ -1,21 +1,32 @@
 import react from '@vitejs/plugin-react';
+import {existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {defineConfig} from 'vitest/config';
 
-const appBase = '/showroom/gameshell/';
-const designSystemRoot = fileURLToPath(
+const appBase = process.env.VERCEL ? '/' : '/showroom/gameshell/';
+const localDesignSystemRoot = fileURLToPath(
+  new URL('../Joker-DS', import.meta.url),
+);
+const bundledDesignSystemRoot = fileURLToPath(
   new URL('./node_modules/@joker/design-system', import.meta.url),
 );
+const useLocalDesignSystem = existsSync(`${localDesignSystemRoot}/dist/index.js`);
+const designSystemRoot = useLocalDesignSystem
+  ? localDesignSystemRoot
+  : bundledDesignSystemRoot;
+
+function isDesignSystemRouletteImporter(importer) {
+  return Boolean(
+    importer &&
+      (importer.includes('/Joker-DS/dist/components/RouletteWheel/') ||
+        importer.includes('/@joker/design-system/dist/components/RouletteWheel/')),
+  );
+}
 
 function repairIncompleteRouletteWheelBuild() {
   const wrapperReplacement = '\0joker:RouletteWrapper';
   const pathsReplacement = '\0joker:rouletteWheelPaths';
-  const originalPaths = fileURLToPath(
-    new URL(
-      './node_modules/@joker/design-system/dist/components/RouletteWheel/rouletteWheelPaths.js',
-      import.meta.url,
-    ),
-  );
+  const originalPaths = `${designSystemRoot}/dist/components/RouletteWheel/rouletteWheelPaths.js`;
 
   return {
     name: 'repair-incomplete-roulette-wheel-build',
@@ -23,18 +34,14 @@ function repairIncompleteRouletteWheelBuild() {
     resolveId(source, importer) {
       if (
         source === './RouletteWrapper' &&
-        importer?.includes(
-          '/@joker/design-system/dist/components/RouletteWheel/',
-        )
+        isDesignSystemRouletteImporter(importer)
       ) {
         return wrapperReplacement;
       }
 
       if (
         source === './rouletteWheelPaths' &&
-        importer?.includes(
-          '/@joker/design-system/dist/components/RouletteWheel/',
-        )
+        isDesignSystemRouletteImporter(importer)
       ) {
         return pathsReplacement;
       }
@@ -77,12 +84,34 @@ function repairIncompleteRouletteWheelBuild() {
   };
 }
 
+function overrideDesignSystemNavigationData() {
+  const overridePath = fileURLToPath(
+    new URL('./src/data/shellNavigationData.js', import.meta.url),
+  );
+
+  return {
+    name: 'original-games-nav-without-4d-mines',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      if (
+        source.endsWith('/data/navigationData.js') &&
+        (importer?.includes('/Joker-DS/') ||
+          importer?.includes('/@joker/design-system/'))
+      ) {
+        return overridePath;
+      }
+
+      return null;
+    },
+  };
+}
+
 function bundleDesignSystemSoundAssets() {
   return {
     name: 'bundle-design-system-sound-assets',
     enforce: 'pre',
     transform(code, id) {
-      if (!id.endsWith('/@joker/design-system/dist/utils/designSystemSoundAssets.js')) {
+      if (!id.endsWith('/dist/utils/designSystemSoundAssets.js')) {
         return null;
       }
 
@@ -130,6 +159,7 @@ function redirectMissingBaseSlash() {
 export default defineConfig({
   plugins: [
     react(),
+    overrideDesignSystemNavigationData(),
     bundleDesignSystemSoundAssets(),
     repairIncompleteRouletteWheelBuild(),
     redirectMissingBaseSlash(),
@@ -148,7 +178,7 @@ export default defineConfig({
     host: true,
     allowedHosts: true,
     watch: {
-      ignored: ['!**/DesignSystemJokerShowroom/**'],
+      ignored: ['!**/Joker-DS/**'],
     },
     fs: {
       allow: ['..'],
@@ -159,21 +189,31 @@ export default defineConfig({
   },
   resolve: {
     alias: [
+      ...(useLocalDesignSystem
+        ? [
+            {
+              find: '@joker/design-system/styles.css',
+              replacement: `${designSystemRoot}/src/styles/index.css`,
+            },
+            {
+              find: /^@joker\/design-system\/styles\/(.+)$/,
+              replacement: `${designSystemRoot}/src/styles/$1`,
+            },
+            {
+              find: '@joker/design-system',
+              replacement: `${designSystemRoot}/dist/index.js`,
+            },
+            {
+              find: '../EnterBetPrecursor/index.js',
+              replacement: `${designSystemRoot}/dist/components/EnterBetPrecursor/index.js`,
+            },
+          ]
+        : []),
       {
-        find: '@joker/design-system/styles.css',
-        replacement: `${designSystemRoot}/src/styles/index.css`,
-      },
-      {
-        find: /^@joker\/design-system\/styles\/(.+)$/,
-        replacement: `${designSystemRoot}/src/styles/$1`,
-      },
-      {
-        find: '@joker/design-system',
-        replacement: `${designSystemRoot}/dist/index.js`,
-      },
-      {
-        find: '../EnterBetPrecursor/index.js',
-        replacement: `${designSystemRoot}/dist/components/EnterBetPrecursor/index.js`,
+        find: `${designSystemRoot}/dist/data/navigationData.js`,
+        replacement: fileURLToPath(
+          new URL('./src/data/shellNavigationData.js', import.meta.url),
+        ),
       },
     ],
   },

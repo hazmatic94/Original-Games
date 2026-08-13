@@ -1,6 +1,8 @@
 export const coinFlipRtp = 0.96;
 export const coinFlipMaxWins = 4;
 export const coinFlipFairProbability = 0.5;
+export const coinTossDurationMs = 1080;
+export const coinTossFlipSoundDelayMs = Math.round(coinTossDurationMs * 0.065);
 
 export const coinFlipNavigationPreset = {
   defaultValue: "coin-flip",

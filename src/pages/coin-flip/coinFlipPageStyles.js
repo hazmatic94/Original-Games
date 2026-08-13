@@ -41,7 +41,6 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   --coin-flip-coin-height-ratio: 0.48;
   --coin-flip-coin-min-size: 320px;
   --coin-flip-coin-max-size: 428px;
-  --coin-flip-rings-bottom-offset: 0px;
   --coin-pull-scale-x: 1;
   --coin-pull-scale-y: 1;
   --coin-shadow-scale: 1;
@@ -95,7 +94,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
     ),
     var(--coin-flip-coin-max-size)
   );
-  --coin-toss-stage-size: calc(var(--coin-size) / 0.64);
+  --coin-toss-stage-size: var(--coin-size);
 }
 
 .joker-coin-flip-game-frame__top {
@@ -178,65 +177,22 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   min-height: var(--coin-flip-progression-slot-height);
 }
 
-.joker-coin-flip-game-frame .joker-coin-toss-rings__ring--outer,
-.joker-coin-flip-game-frame .joker-coin-toss-rings__ring--inner,
-.joker-coin-flip-game-frame .joker-coin-toss-rings__pool,
-.joker-coin-flip-game-frame .joker-coin-toss-rings__reflection,
-.joker-coin-flip-game-frame .joker-coin-toss-rings__plane,
-.joker-coin-flip-game-frame .joker-coin-toss-rings__coin-shadow,
-.joker-coin-flip-game-frame .joker-coin-toss__glow {
-  display: none;
-}
-
-.joker-coin-flip-game-frame .joker-coin-toss__arena > .joker-coin-toss-rings {
-  display: block;
-  position: absolute;
-  right: 0;
-  bottom: var(--coin-toss-hover-base);
-  left: 0;
-  z-index: 0;
-  width: 100%;
-  height: calc(var(--coin-size) + var(--coin-toss-lift));
-  pointer-events: none;
-}
-
-.joker-coin-flip-game-frame .joker-coin-toss-rings {
-  width: 100%;
-  height: 100%;
-}
-
-.joker-coin-flip-game-frame .joker-coin-toss-rings__surface {
-  position: absolute;
-  inset: 0;
-}
-
-.joker-coin-flip-game-frame .joker-coin-toss-rings__particles,
-.joker-coin-flip-game-frame .joker-coin-toss__particles {
-  display: block;
-  visibility: visible;
-  opacity: 1;
-}
-
-.joker-coin-flip-game-frame .joker-coin-toss-rings__particles {
-  position: absolute;
-  inset: 0;
-  overflow: visible;
-}
-
+.joker-coin-flip-game-frame .joker-coin-toss__tap-target,
 .joker-coin-flip-game-frame .joker-coin-toss__arena {
-  height: calc(
-    var(--coin-toss-hover-base) + var(--coin-toss-hover-bob) +
-      var(--coin-size) + var(--coin-toss-lift)
-  );
-}
-
-.joker-coin-flip-game-frame .joker-coin-toss__playfield {
-  bottom: var(--coin-toss-hover-base);
+  margin-inline: auto;
 }
 
 .joker-coin-flip-game-frame .joker-coin-toss-demo__hint {
+  position: absolute;
+  top: auto;
+  right: auto;
+  bottom: calc(var(--coin-size) + 16px);
+  left: 50%;
+  z-index: 8;
   font-size: var(--text-body-14);
   line-height: var(--text-body-line-height);
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 @media (min-width: 1000px) {
@@ -291,11 +247,6 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   animation: joker-coin-flip-load-coin-land 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.joker-coin-flip-game-frame.is-page-load-enter .joker-coin-toss-rings__particles {
-  opacity: 0;
-  animation: joker-coin-flip-load-fade-in 260ms var(--ease-out) 300ms forwards;
-}
-
 .joker-coin-flip-game-frame.is-page-load-enter .joker-coin-toss-demo__hint {
   opacity: 0;
   animation: none;
@@ -323,31 +274,8 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   }
 }
 
-@keyframes joker-coin-flip-load-ring-expand {
-  from {
-    opacity: 0.55;
-    transform: translate(-50%, -50%) scale(0.8);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-@keyframes joker-coin-flip-load-fade-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .joker-coin-flip-game-frame.is-page-load-enter .joker-coin-toss__playfield,
-  .joker-coin-flip-game-frame.is-page-load-enter .joker-coin-toss-rings__particles,
   .joker-coin-flip-game-frame.is-page-load-enter .joker-coin-toss-demo__hint {
     animation: none;
     opacity: 1;
@@ -426,8 +354,9 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
 .joker-coin-flip-coin-zone {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   overflow: visible;
 }
 

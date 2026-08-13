@@ -57,7 +57,7 @@ Each playable game under `src/pages/<game>/` follows the same layout:
 | `<game>PageStyles.js` | Co-located CSS-in-JS for the page |
 | `index.js` | Re-exports the page component |
 
-**Games today:** Mines (default `/`), Hilo, Crash, Roulette, Coin Flip, 4D Mines.
+**Games today:** Mines (default `/`), Hilo, Crash, Roulette, Coin Flip.
 
 **Coco Hut** (`src/pages/coco-hut/`) is a placeholder: background + betting panel shell only. No `cocoHutGameLogic.js` or play flow yet. Disabled in product nav until gameplay is built.
 
@@ -77,7 +77,7 @@ Import cross-game utilities from `src/shared/`:
 
 - **`useGameShellBettingPanelLayout`** — `"desktop"` vs `"mobile"` panel layout
 - **`useDeferredWinCredit`** — credit balance after animations finish
-- **`useOpenGameMenu`** — open the Originals rail menu on mount (Mines, Hilo, 4D Mines)
+- **`useOpenGameMenu`** — open the Originals rail menu on mount (Mines, Hilo)
 - **`gameRouteMap` / `withBase`** — link games from the shell nav
 
 ## Design system

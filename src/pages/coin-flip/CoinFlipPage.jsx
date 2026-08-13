@@ -10,12 +10,17 @@ import {
 } from "@joker/design-system";
 import "@joker/design-system/styles/button.css";
 import "@joker/design-system/styles/inputs.css";
+import "@joker/design-system/styles/coin.css";
+import "@joker/design-system/styles/coin-toss.css";
 import {
   GAME_ROUND_END_STYLES,
   GameRoundEndTransition,
 } from "../../shared/gameRoundEnd.jsx";
+import coinFlipSound from "../../../assets/coin-flip.mp3?url";
+import coinWhooshSound from "../../../assets/coin-whoosh.mp3?url";
 import { formatBalance } from "../../shared/formatting.js";
 import { playCashoutSound, playLossSound, playPlaceBetSound } from "../../shared/gameSounds.js";
+import { playSound } from "../../shared/sounds.js";
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
@@ -27,6 +32,8 @@ import {
   coinFlipFairProbability,
   coinFlipMaxWins,
   coinFlipNavigationPreset,
+  coinTossDurationMs,
+  coinTossFlipSoundDelayMs,
 } from "./coinFlipConfig.js";
 import {
   calculateCoinFlipMultiplier,
@@ -62,6 +69,7 @@ export function CoinFlipPage({ onGameChange }) {
   const [isPageLoadEnter, setIsPageLoadEnter] = useState(true);
   const coinProfitAnimationRef = useRef(null);
   const coinLossResetTimeoutRef = useRef(null);
+  const coinTossSoundTimeoutRef = useRef(null);
   const lossResetHandledRef = useRef(false);
   const coinWinModalResetRef = useRef(false);
   const pendingTossRef = useRef(null);
@@ -75,14 +83,22 @@ export function CoinFlipPage({ onGameChange }) {
     ? getCoinFlipProgressionStepCount(settledCoinCount)
     : coinFlipMaxWins;
   const isRoundLocked = hasActiveCoinRound;
+  const isProgressionBusy = progressionLockingIndex != null || progressionLosingIndex != null;
   const canStartCoinFlip =
     hasCoinBetAmount &&
-    (hasActiveCoinRound || numericBetAmount <= getDisplayBalance(balance)) &&
+    numericBetAmount <= getDisplayBalance(balance) &&
     !isCoinFlipping &&
-    progressionLockingIndex == null &&
-    progressionLosingIndex == null &&
+    tossPhase !== "tossing" &&
+    !isProgressionBusy &&
     (coinRoundStatus === "idle" || coinRoundStatus === "cashedOut");
-  const canFlipCoin = canStartCoinFlip;
+  const canContinueCoinFlip =
+    hasActiveCoinRound &&
+    !isCoinFlipping &&
+    tossPhase !== "tossing" &&
+    !isProgressionBusy &&
+    coinResult !== "loss";
+  const canFlipCoin = canStartCoinFlip || canContinueCoinFlip;
+  const showTapHint = tapHintVisible && !isPageLoadEnter && tossPhase !== "tossing" && coinResult !== "loss";
   const coinProgressionSteps = useMemo(
     () =>
       Array.from({ length: coinProgressionStepCount }, (_, index) => ({
@@ -94,6 +110,7 @@ export function CoinFlipPage({ onGameChange }) {
   const currentCoinProfit = calculateCoinFlipProfit(betAmount, settledCoinCount);
   const coinFlipStageRef = useRef(null);
   const coinHistoryRailRef = useRef(null);
+  const [tossCoinSizePx, setTossCoinSizePx] = useState(256);
 
   useLayoutEffect(() => {
     const rail = coinHistoryRailRef.current;
@@ -103,6 +120,33 @@ export function CoinFlipPage({ onGameChange }) {
 
     rail.scrollLeft = Math.max(0, rail.scrollWidth - rail.clientWidth);
   }, [coinHistory, coinProgressionStepCount]);
+
+  useLayoutEffect(() => {
+    const frame = coinFlipStageRef.current;
+    if (!frame) {
+      return undefined;
+    }
+
+    function syncTossCoinSize() {
+      const parsed = Number.parseFloat(getComputedStyle(frame).getPropertyValue("--coin-size"));
+      if (!Number.isFinite(parsed) || parsed <= 0) {
+        return;
+      }
+
+      const nextSize = Math.round(parsed);
+      setTossCoinSizePx((currentSize) => (currentSize === nextSize ? currentSize : nextSize));
+    }
+
+    syncTossCoinSize();
+
+    if (typeof ResizeObserver === "undefined") {
+      return undefined;
+    }
+
+    const observer = new ResizeObserver(syncTossCoinSize);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -119,6 +163,9 @@ export function CoinFlipPage({ onGameChange }) {
       }
       if (coinLossResetTimeoutRef.current) {
         window.clearTimeout(coinLossResetTimeoutRef.current);
+      }
+      if (coinTossSoundTimeoutRef.current) {
+        window.clearTimeout(coinTossSoundTimeoutRef.current);
       }
     };
   }, []);
@@ -356,33 +403,39 @@ export function CoinFlipPage({ onGameChange }) {
     setTapHintVisible(false);
     setTossOutcome(result);
     setTossPhase("tossing");
+    playCoinTossSounds();
+  }
+
+  function playCoinTossSounds() {
+    if (coinTossSoundTimeoutRef.current) {
+      window.clearTimeout(coinTossSoundTimeoutRef.current);
+      coinTossSoundTimeoutRef.current = null;
+    }
+
+    playSound(coinWhooshSound);
+    coinTossSoundTimeoutRef.current = window.setTimeout(() => {
+      coinTossSoundTimeoutRef.current = null;
+      playSound(coinFlipSound);
+    }, coinTossFlipSoundDelayMs);
   }
 
   const flipCoin = useCallback(() => {
-    if (tossPhase === "tossing" || !canFlipCoin) return;
+    if (tossPhase === "tossing") return;
 
-    if (!hasActiveCoinRound) {
-      if (isCoinCashedOut) {
-        resetCoinRound();
-      }
-
-      setCoinWinModal(null);
-      coinWinModalResetRef.current = false;
-      setCoinResult(null);
-      setCoinHistory([]);
-      setCoinRoundStatus("active");
-      setProgressionActiveIndex(0);
-      setProgressionCompletedThrough(-1);
-      setProgressionLockingIndex(null);
-      setProgressionLosingIndex(null);
-      setProgressionLossIndex(null);
-      setCoinProgressionKey((currentKey) => currentKey + 1);
-      runCoinFlipAnimation(true);
+    if (hasActiveCoinRound) {
+      if (!canContinueCoinFlip) return;
+      runCoinFlipAnimation();
       return;
     }
 
-    runCoinFlipAnimation();
-  }, [canFlipCoin, hasActiveCoinRound, isCoinCashedOut, tossPhase]);
+    if (!canStartCoinFlip) return;
+
+    if (isCoinCashedOut) {
+      resetCoinRound();
+    }
+
+    startCoinFlipRound();
+  }, [canContinueCoinFlip, canStartCoinFlip, hasActiveCoinRound, isCoinCashedOut, tossPhase]);
 
   const isMobileBettingPanel = bettingPanelLayout === "mobile";
   const oddsOptions = getCoinFlipOddsOptions(betAmount, settledCoinCount);
@@ -553,9 +606,12 @@ export function CoinFlipPage({ onGameChange }) {
                               tossPhase={tossPhase}
                               tossOutcome={tossOutcome}
                               onTossEnd={handleTossEnd}
+                              tossDurationMs={coinTossDurationMs}
+                              stageSizePx={tossCoinSizePx}
                               tapHint="Tap to flip"
-                              tapHintVisible={tapHintVisible && canFlipCoin && !isPageLoadEnter}
+                              tapHintVisible={showTapHint}
                               soundEnabled={false}
+                              style={{ "--coin-size": `${tossCoinSizePx}px` }}
                             />
                           </button>
                         </div>

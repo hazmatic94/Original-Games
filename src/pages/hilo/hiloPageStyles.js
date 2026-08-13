@@ -45,36 +45,29 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   gap: var(--spacing-8);
 }
 
-.joker-hilo-betting-panel .joker-odds-button-group button:disabled {
+.joker-hilo-betting-panel .joker-odds-button-group button:disabled,
+.joker-hilo-betting-panel .joker-odds-button-group button.is-selected:disabled,
+.joker-hilo-betting-panel .joker-odds-button-group button[aria-pressed="true"]:disabled,
+.joker-hilo-mobile-odds .joker-odds-button-group button:disabled,
+.joker-hilo-mobile-odds .joker-odds-button-group button.is-selected:disabled,
+.joker-hilo-mobile-odds .joker-odds-button-group button[aria-pressed="true"]:disabled,
+.joker-hilo-betting-panel.is-hilo-pre-game:not(.is-hilo-pre-game-ready) .joker-odds-button-group button {
   border-color: var(--button-hi-lo-border);
   background: var(--button-hi-lo-bg);
+  background-color: var(--button-hi-lo-bg);
+  background-image: none;
   box-shadow: none;
   color: var(--button-hi-lo-text);
   opacity: 0.4;
   cursor: not-allowed;
+  pointer-events: none;
   transform: none;
 }
 
-@media (min-width: 1000px) {
-  .joker-hilo-betting-panel.is-hilo-pre-game:not(.is-hilo-pre-game-ready) .joker-button--hi-lo {
-    pointer-events: none;
-    cursor: not-allowed;
-    opacity: 0.56;
-  }
-
-  .joker-hilo-betting-panel.is-hilo-pre-game.is-awaiting-hilo-choice .joker-betting-submit-group .joker-button {
-    pointer-events: none;
-    cursor: not-allowed;
-    opacity: 0.45;
-  }
-}
-
-@media (max-width: 999px) {
-  .joker-hilo-betting-panel.is-hilo-pre-game.is-awaiting-hilo-choice .joker-betting-submit-group .joker-button {
-    pointer-events: none;
-    cursor: not-allowed;
-    opacity: 0.45;
-  }
+.joker-hilo-betting-panel.is-hilo-pre-game.is-awaiting-hilo-choice .joker-betting-submit-group .joker-button {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .joker-game-shell--hilo .joker-game-inner-canvas {
@@ -99,11 +92,6 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   height: 100%;
   min-height: 0;
   box-sizing: border-box;
-  --hilo-betting-divider-offset: var(--betting-panel-bet-field-stack-offset);
-  --hilo-sync-history-rail-height: var(--hilo-betting-divider-offset);
-  --hilo-sync-divider-band: calc(
-    var(--hilo-betting-divider-offset) + var(--border-width-default)
-  );
   --hilo-board-padding: var(--spacing-24);
   --hilo-main-native-width: 296px;
   --hilo-main-native-height: 398.5px;
@@ -129,12 +117,15 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   --hilo-mini-scale-factor: 0.58;
   --hilo-mini-native-width: 110px;
   --hilo-mini-native-height: 76px;
+  --hilo-history-chip-height: 30px;
+  --hilo-history-chip-overhang: calc(var(--hilo-history-chip-height) / 2);
   --hilo-row-content-native-width: calc(
     var(--hilo-main-native-width) * (1 + (2 * var(--hilo-side-to-main-ratio)))
   );
   --hilo-history-band-height: calc(
-    (var(--spacing-8) + 18px) * var(--hilo-play-scale-bias) + 76px * 0.58 * var(--hilo-play-scale-bias) +
-      var(--spacing-16)
+    var(--spacing-24) + var(--hilo-history-chip-overhang) +
+      (var(--hilo-mini-native-height) * var(--hilo-mini-scale-factor)) + var(--spacing-24) +
+      var(--border-width-default)
   );
   --hilo-play-scale: min(
     (100cqw - (2 * var(--hilo-play-gap))) / var(--hilo-row-content-native-width),
@@ -168,9 +159,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
 }
 
 .joker-hilo-history-rail {
-  --hilo-history-chip-room: 18px;
-  --hilo-history-chip-height: 30px;
-  --hilo-history-chip-overhang: calc(var(--hilo-history-chip-height) / 2);
+  --hilo-history-chip-room: var(--hilo-history-chip-overhang);
   position: relative;
   z-index: 2;
   display: flex;
@@ -307,14 +296,18 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   flex: 0 0 auto;
   flex-direction: column;
   align-items: stretch;
+  gap: var(--spacing-24);
   border-bottom: 0;
   box-sizing: border-box;
-  padding: var(--spacing-16) var(--spacing-24);
+  padding: var(--spacing-24) var(--spacing-24) 0;
   overflow: visible;
   background: var(--joker-black-800);
 }
 
 .joker-hilo-game-frame__top > .joker-betting-divider {
+  position: relative;
+  z-index: 1;
+  display: block;
   width: calc(100% + (2 * var(--spacing-24)));
   margin-inline: calc(-1 * var(--spacing-24));
   flex: 0 0 auto;
@@ -324,16 +317,17 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   .joker-hilo-game-frame__top {
     position: relative;
     flex: 0 0 auto;
-    height: var(--hilo-sync-divider-band);
-    min-height: var(--hilo-sync-divider-band);
-    max-height: var(--hilo-sync-divider-band);
-    padding: 0;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    padding: var(--spacing-24) var(--spacing-24) 0;
+    gap: var(--spacing-24);
   }
 
   .joker-hilo-history-rail {
     display: flex;
-    height: var(--hilo-sync-history-rail-height);
-    max-height: var(--hilo-sync-history-rail-height);
+    height: auto;
+    max-height: none;
     flex: 0 0 auto;
     align-items: center;
     justify-content: flex-start;
@@ -346,22 +340,22 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
     display: flex;
     width: max-content;
     min-width: 100%;
-    height: 100%;
+    height: auto;
     min-height: 0;
     align-items: center;
     justify-content: flex-start;
     gap: var(--spacing-8);
-    padding-inline-start: var(--spacing-24);
+    padding-inline-start: 0;
     box-sizing: border-box;
   }
 
   .joker-hilo-game-frame__top > .joker-betting-divider {
-    position: absolute;
-    top: var(--hilo-betting-divider-offset);
-    right: 0;
-    left: 0;
-    width: auto;
-    margin: 0;
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    width: calc(100% + (2 * var(--spacing-24)));
+    margin: 0 calc(-1 * var(--spacing-24));
   }
 }
 
@@ -493,7 +487,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   z-index: 4;
   margin: 0;
   flex: 0 0 auto;
-  padding: 12px 16px;
+  padding: 8px 12px;
   box-sizing: border-box;
   border: var(--border-width-default) solid var(--joker-black-100);
   border-top: 0;
@@ -501,7 +495,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   background: var(--joker-black-600);
   color: var(--joker-white-50);
   font-family: var(--font-heading);
-  font-size: var(--text-heading-h3);
+  font-size: 20px;
   font-weight: var(--text-heading-weight);
   letter-spacing: 0;
   line-height: var(--text-heading-line-height-compact);
@@ -1131,6 +1125,15 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
 
   .joker-hilo-mobile-odds .joker-hi-lo-odds {
     gap: var(--spacing-8);
+  }
+
+  .joker-game-shell--hilo .joker-hilo-betting-panel .joker-bet-field > .joker-input-label,
+  .joker-game-shell--hilo .joker-hilo-betting-panel .joker-odds-button-group-field > .joker-input-label {
+    display: block;
+  }
+
+  .joker-game-shell--hilo .joker-hilo-betting-panel .joker-odds-button-group:not(.is-inline) {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

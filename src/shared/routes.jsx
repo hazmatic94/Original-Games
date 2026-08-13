@@ -27,10 +27,6 @@ export const gameRoutes = [
     Page: lazyPage(() => import("../pages/coco-hut/index.js"), "CocoHutPage"),
   },
   {
-    pathname: "/4d-mines",
-    Page: lazyPage(() => import("../pages/four-d-mines/index.js"), "FourDMinesPage"),
-  },
-  {
     pathname: "/",
     Page: lazyPage(() => import("../pages/mines/index.js"), "MinesPage"),
   },

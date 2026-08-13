@@ -8,3 +8,5 @@ npm-debug.log*
 .npm-cache/
 .yarn/install-state.gz
 ./yarn/*
+.vercel
+.env*

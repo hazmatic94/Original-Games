@@ -108,30 +108,22 @@ export function MobileShellScrollFix() {
         @media (max-width: 999px) {
           .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel {
             display: grid;
-            grid-template-rows: auto auto auto;
+            grid-template-rows: minmax(0, 1fr) auto;
             align-content: start;
-            gap: var(--spacing-16);
+            gap: 0;
             padding: var(--spacing-24);
           }
 
-          .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel > .joker-betting-submit-group {
+          .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel > .joker-betting-main {
             order: 1;
           }
 
-          .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel > .joker-hilo-betting-submit-spacer {
-            display: none;
-          }
-
-          .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel > .joker-betting-divider {
+          .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel > .joker-betting-footer-actions {
             order: 2;
           }
 
-          .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel > .joker-betting-main {
-            order: 3;
-          }
-
           .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel .joker-betting-main {
-            gap: var(--spacing-16);
+            gap: var(--spacing-24);
           }
 
         }

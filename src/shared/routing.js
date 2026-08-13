@@ -10,7 +10,6 @@ export function withBase(path) {
 }
 
 export const gameRouteMap = {
-  "4d-mines": "/4d-mines",
   "coco-hut": "/coco-hut",
   "coin-flip": "/coin-flip",
   crash: "/crash",

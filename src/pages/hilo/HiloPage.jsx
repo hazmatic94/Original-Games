@@ -4,7 +4,6 @@ import {
   Button,
   CashoutFooter,
   GameShell,
-  MobileHiLoOddsGroup,
   OddsButtonGroup,
 } from "@joker/design-system";
 import "@joker/design-system/styles/button.css";
@@ -319,7 +318,7 @@ export function HiloPage({ onGameChange }) {
 
   const isMobileBettingPanel = bettingPanelLayout === "mobile";
   const awaitingHiloChoice = !gameInPlay && hasBetAmount && !pendingPrediction;
-  const oddsDisabled = !gameInPlay && !isMobileBettingPanel && !hasBetAmount;
+  const oddsDisabled = !gameInPlay && !hasBetAmount;
   const panelClassName = [
     "joker-hilo-betting-panel",
     !gameInPlay ? "is-hilo-pre-game" : "",
@@ -346,7 +345,7 @@ export function HiloPage({ onGameChange }) {
                 isMobileBettingPanel ? "HiLo mobile betting panel" : "HiLo betting panel"
               }
               className={panelClassName}
-              layout={bettingPanelLayout}
+              layout="desktop"
               betAmount={betAmount}
               onBetAmountChange={handleBetAmountInputChange}
               onPlaceBet={handlePlaceBet}
@@ -355,45 +354,35 @@ export function HiloPage({ onGameChange }) {
                 gameInPlay ? <CashoutFooter onCashout={handleCashout} /> : undefined
               }
             >
-              {isMobileBettingPanel ? (
-                <MobileHiLoOddsGroup
-                  className="joker-hilo-betting-actions"
-                  disabled={oddsDisabled}
-                  lowerOdds={formatHiloPercent(displayOdds.lowerPercent)}
-                  higherOdds={formatHiloPercent(displayOdds.higherPercent)}
-                  onLowerSame={() => handleHiloChoiceSelection("lower")}
-                  onHigherSame={() => handleHiloChoiceSelection("higher")}
-                  onValueChange={setPendingPrediction}
-                  value={pendingPrediction}
-                />
-              ) : (
-                <OddsButtonGroup
-                  className="joker-hilo-betting-actions"
-                  ariaLabel="HiLo choice"
-                  layout="stacked"
-                  showOdds={false}
-                  showDirection
-                  value={pendingPrediction}
-                  onValueChange={setPendingPrediction}
-                  disabled={oddsDisabled}
-                  options={[
-                    {
-                      value: "lower",
-                      label: "Lower / Same",
-                      odds: formatHiloPercent(displayOdds.lowerPercent),
-                      direction: "down",
-                      onClick: () => handleHiloChoiceSelection("lower"),
-                    },
-                    {
-                      value: "higher",
-                      label: "Higher / Same",
-                      odds: formatHiloPercent(displayOdds.higherPercent),
-                      direction: "up",
-                      onClick: () => handleHiloChoiceSelection("higher"),
-                    },
-                  ]}
-                />
-              )}
+              <OddsButtonGroup
+                className="joker-hilo-betting-actions"
+                ariaLabel="HiLo choice"
+                layout="stacked"
+                showOdds={false}
+                showDirection
+                value={pendingPrediction}
+                onValueChange={(value) => {
+                  if (oddsDisabled) return;
+                  setPendingPrediction(value);
+                }}
+                disabled={oddsDisabled}
+                options={[
+                  {
+                    value: "lower",
+                    label: "Lower / Same",
+                    odds: formatHiloPercent(displayOdds.lowerPercent),
+                    direction: "down",
+                    onClick: () => handleHiloChoiceSelection("lower"),
+                  },
+                  {
+                    value: "higher",
+                    label: "Higher / Same",
+                    odds: formatHiloPercent(displayOdds.higherPercent),
+                    direction: "up",
+                    onClick: () => handleHiloChoiceSelection("higher"),
+                  },
+                ]}
+              />
 
               {gameInPlay ? (
                 <Button

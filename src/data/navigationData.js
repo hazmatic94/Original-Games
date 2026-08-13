@@ -6,7 +6,6 @@ export const navigationIconAssets = {
   crash: new URL("../../assets/nav-icons/crash.svg", import.meta.url).href,
   "chicken-cross": new URL("../../assets/nav-icons/chicken-cross.svg", import.meta.url).href,
   mines: new URL("../../assets/nav-icons/mines.svg", import.meta.url).href,
-  "4d-mines": new URL("../../assets/nav-icons/4d-mines.svg", import.meta.url).href,
   "hi-lo": new URL("../../assets/nav-icons/hi-lo.svg", import.meta.url).href,
   tower: new URL("../../assets/nav-icons/tower.svg", import.meta.url).href,
   casino: new URL("../../assets/nav-icons/casino.svg", import.meta.url).href,
@@ -30,7 +29,6 @@ export const navigationItemRegistry = {
   crash: { label: "Crash", icon: "crash", value: "crash", section: "games" },
   chickenCross: { label: "Chicken Cross", icon: "chicken-cross", value: "chicken-cross", section: "games" },
   mines: { label: "Mines", icon: "mines", value: "mines", section: "games" },
-  fourDMines: { label: "4D Mines", icon: "4d-mines", value: "4d-mines", section: "games" },
   hilo: { label: "Hilo", icon: "hi-lo", value: "hilo", section: "games" },
   tower: { label: "Tower", icon: "tower", value: "tower", section: "games" },
   casino: { label: "Casino", icon: "casino", section: "games" },
@@ -48,7 +46,6 @@ export const gameMenuItems = [
   navigationItemRegistry.crash,
   navigationItemRegistry.chickenCross,
   navigationItemRegistry.mines,
-  navigationItemRegistry.fourDMines,
   navigationItemRegistry.hilo,
   navigationItemRegistry.tower,
 ].map((item, index) => ({
