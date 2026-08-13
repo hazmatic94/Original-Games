@@ -32,7 +32,7 @@ import { getHiloPageStyles } from "./hiloPageStyles.js";
 export function HiloPage({ onGameChange }) {
   const [betAmount, setBetAmount] = useState("");
   const [balance, setBalance] = useState(150000);
-  const { deferWinCredit, applyDeferredWinCredit } = useDeferredWinCredit(setBalance);
+  const { deferWinCredit, applyDeferredWinCredit, getDisplayBalance } = useDeferredWinCredit(setBalance);
   const [currentCard, setCurrentCard] = useState(() => getInitialHiloPreview().currentCard);
   const [deck, setDeck] = useState([]);
   const [history, setHistory] = useState(() => getInitialHiloPreview().history);
@@ -105,6 +105,7 @@ export function HiloPage({ onGameChange }) {
 
   function resetHiloRound() {
     clearHiloRoundResetTimer();
+    applyDeferredWinCredit();
     const preview = createHiloPreviewState();
     setCurrentCard(preview.currentCard);
     setDeck([]);
@@ -129,6 +130,7 @@ export function HiloPage({ onGameChange }) {
   function closeHiloWinModal() {
     clearHiloRoundResetTimer();
     clearHiloWinModalTimer();
+    applyDeferredWinCredit();
     setHiloWinModal(null);
     hiloWinModalResetRef.current = false;
     resetHiloRound();
@@ -330,7 +332,7 @@ export function HiloPage({ onGameChange }) {
     <>
       <style>{getHiloPageStyles(GAME_ROUND_END_STYLES)}</style>
       <GameShell
-        balance={formatBalance(balance)}
+        balance={formatBalance(getDisplayBalance(balance))}
         className="joker-game-shell--hilo"
         defaultValue={hiloNavigationPreset.defaultValue}
         game={hiloNavigationPreset.game}
@@ -369,6 +371,7 @@ export function HiloPage({ onGameChange }) {
           onHigherSame={() => handleHiloChoiceSelection("higher")}
           onLowerSame={() => handleHiloChoiceSelection("lower")}
           onSkipCard={handleSkipCard}
+          balance={balance}
           onWinModalClose={handleHiloWinModalClose}
           onWinCoinsLand={applyDeferredWinCredit}
           pendingPrediction={pendingPrediction}

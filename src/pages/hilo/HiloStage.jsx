@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { HigherCard, LowerCard, MobileHiLoOddsGroup, WinModalCard } from "@joker/design-system";
+import { HigherCard, LowerCard, MobileHiLoOddsGroup } from "@joker/design-system";
+import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
+import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
 import { GameRoundEndTransition } from "../../shared/gameRoundEnd.jsx";
-import { formatCurrency } from "../../shared/formatting.js";
 import { hiloRanks, hiloSuits, HILO_PAGE_LOAD_ANIMATION_MS } from "./hiloConfig.js";
 import { HiloHistoryEntry } from "./HiloHistoryEntry.jsx";
 import { HiloMainCard } from "./HiloMainCard.jsx";
@@ -20,6 +21,7 @@ export function HiloStage({
   onHigherSame,
   onLowerSame,
   onSkipCard,
+  balance,
   onWinModalClose,
   onWinCoinsLand,
   pendingPrediction,
@@ -135,9 +137,9 @@ export function HiloStage({
                       roundStatus === "pre-game" ? false : roundStatus !== "active" || !skipAvailable
                     }
                   >
-                    <p className="joker-hilo-game-frame__status">
+                    <h3 className="joker-hilo-game-frame__status">
                       CARD <strong>{history.length}</strong> OF <strong>{cardTotal}</strong>
-                    </p>
+                    </h3>
                   </HiloMainCard>
                 </div>
                 <HiloChoiceCard
@@ -173,17 +175,15 @@ export function HiloStage({
         </div>
       </div>
       {winModal && (
-        <div className="joker-hilo-result-card" role="status" aria-live="polite">
-          <WinModalCard
+        <GameWinModalOverlay className="joker-hilo-result-card" role="status" aria-live="polite">
+          <GameWinModalCard
             title={winModal.title}
-            amountWon={formatCurrency(winModal.profit)}
-            currency={null}
-            message="Your winnings from this round have been added to your balance."
-            closeLabel="Close"
+            balance={balance}
+            profit={winModal.profit}
             onCoinsLand={onWinCoinsLand}
             onClose={onWinModalClose}
           />
-        </div>
+        </GameWinModalOverlay>
       )}
     </section>
   );

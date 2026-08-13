@@ -41,7 +41,7 @@ export function FourDMinesPage({ onGameChange }) {
   const [bettingPanelKey, setBettingPanelKey] = useState(0);
   const [activeFourDNumber, setActiveFourDNumber] = useState("");
   const [balance, setBalance] = useState(150000);
-  const { deferWinCredit, applyDeferredWinCredit } = useDeferredWinCredit(setBalance);
+  const { deferWinCredit, applyDeferredWinCredit, getDisplayBalance } = useDeferredWinCredit(setBalance);
   const [board, setBoard] = useState([]);
   const [message, setMessage] = useState("");
   const [mines, setMines] = useState(String(minFourDMinesAmount));
@@ -86,6 +86,7 @@ export function FourDMinesPage({ onGameChange }) {
   }
 
   function dismissCashoutResult() {
+    applyDeferredWinCredit();
     setRoundStatus("idle");
     setBoard([]);
     setRevealedTiles([]);
@@ -203,7 +204,7 @@ export function FourDMinesPage({ onGameChange }) {
     <>
       <style>{getFourDMinesPageStyles(GAME_ROUND_END_STYLES)}</style>
       <GameShell
-        balance={formatBalance(balance)}
+        balance={formatBalance(getDisplayBalance(balance))}
         className="joker-game-shell--4d-mines"
         defaultValue={fourDMinesNavigationPreset.defaultValue}
         game={fourDMinesNavigationPreset.game}
@@ -229,6 +230,7 @@ export function FourDMinesPage({ onGameChange }) {
         }
       >
         <FourDMinesGrid
+          balance={balance}
           board={board}
           cashoutResult={cashoutResult}
           columns={fourDMinesGrid.columns}

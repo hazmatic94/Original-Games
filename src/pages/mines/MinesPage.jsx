@@ -43,7 +43,7 @@ export function MinesPage({ onGameChange }) {
   const [bettingMode, setBettingMode] = useState("manual");
   const [betAmount, setBetAmount] = useState("");
   const [balance, setBalance] = useState(150000);
-  const { deferWinCredit, applyDeferredWinCredit } = useDeferredWinCredit(setBalance);
+  const { deferWinCredit, applyDeferredWinCredit, getDisplayBalance } = useDeferredWinCredit(setBalance);
   const [board, setBoard] = useState([]);
   const [message, setMessage] = useState("");
   const [mines, setMines] = useState(String(minTileAmount));
@@ -100,6 +100,7 @@ export function MinesPage({ onGameChange }) {
   }
 
   function dismissCashoutResult() {
+    applyDeferredWinCredit();
     setRoundStatus("idle");
     setBoard([]);
     setRevealedTiles([]);
@@ -222,7 +223,7 @@ export function MinesPage({ onGameChange }) {
     <>
       <style>{getMinesPageStyles(GAME_ROUND_END_STYLES)}</style>
       <GameShell
-        balance={formatBalance(balance)}
+        balance={formatBalance(getDisplayBalance(balance))}
         className="joker-game-shell--mines"
         defaultValue={minesNavigationPreset.defaultValue}
         game={minesNavigationPreset.game}
@@ -249,6 +250,7 @@ export function MinesPage({ onGameChange }) {
         }
       >
         <MinesGrid
+          balance={balance}
           board={board}
           cashoutResult={cashoutResult}
           freshRevealedTiles={freshRevealedTiles}

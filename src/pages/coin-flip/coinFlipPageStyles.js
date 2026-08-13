@@ -1,5 +1,8 @@
+import { GAME_WIN_MODAL_OVERLAY_STYLES } from "../../shared/GameWinModalOverlay.jsx";
+
 export function getCoinFlipPageStyles(gameRoundEndStyles) {
   return `
+${GAME_WIN_MODAL_OVERLAY_STYLES}
 .joker-game-shell--coin-flip .joker-game-inner-canvas,
 .joker-game-shell--coin-flip .joker-game-shell-empty-stage {
   min-height: 0;
@@ -347,21 +350,8 @@ export function getCoinFlipPageStyles(gameRoundEndStyles) {
   justify-content: center;
 }
 
-.joker-coin-flip-result-card {
-  position: absolute;
-  inset: 0;
-  z-index: 40;
-  display: grid;
-  place-items: center;
-  padding: var(--spacing-24);
-  pointer-events: auto;
-  transform: scale(0.96);
-  animation: joker-coin-flip-result-pop 420ms var(--ease-standard) both;
-}
-
 .joker-coin-flip-result-card > * {
-  max-width: min(500px, calc(100% - var(--spacing-48)));
-  box-shadow: 0 var(--spacing-24) var(--spacing-64) rgb(0 0 0 / 0.42);
+  animation: joker-coin-flip-result-pop 420ms var(--ease-standard) both;
 }
 
 @keyframes joker-coin-flip-result-pop {

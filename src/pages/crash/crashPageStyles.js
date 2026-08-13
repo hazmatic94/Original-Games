@@ -1,5 +1,8 @@
+import { GAME_WIN_MODAL_OVERLAY_STYLES } from "../../shared/GameWinModalOverlay.jsx";
+
 export function getCrashPageStyles(gameRoundEndStyles) {
   return `
+${GAME_WIN_MODAL_OVERLAY_STYLES}
 .joker-crash-stage {
   width: 100%;
   height: 100%;
@@ -383,18 +386,7 @@ export function getCrashPageStyles(gameRoundEndStyles) {
   text-transform: inherit;
 }
 
-.joker-crash-result-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 8;
-  display: grid;
-  place-items: center;
-  padding: var(--spacing-24);
-  pointer-events: none;
-}
-
-.joker-crash-result-card {
-  pointer-events: auto;
+.joker-crash-result-overlay > * {
   animation: joker-crash-result-pop 420ms var(--ease-standard) both;
 }
 

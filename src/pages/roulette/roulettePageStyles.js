@@ -1,7 +1,9 @@
+import { GAME_WIN_MODAL_OVERLAY_STYLES } from "../../shared/GameWinModalOverlay.jsx";
 import { ROULETTE_WIN_CHIP_SIZE } from "./rouletteConfig.js";
 
 export function getRoulettePageStyles(gameRoundEndStyles) {
   return `
+${GAME_WIN_MODAL_OVERLAY_STYLES}
 
   .joker-game-shell--roulette .joker-game-inner-canvas,
   .joker-game-shell--roulette .joker-game-shell-empty-stage,
@@ -281,18 +283,25 @@ export function getRoulettePageStyles(gameRoundEndStyles) {
     }
   }
 
-  .joker-roulette-result-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 40;
-    display: grid;
-    place-items: center;
-    padding: var(--spacing-24);
-    pointer-events: none;
+  .joker-roulette-result-overlay .joker-roulette-result-card {
+    animation: joker-roulette-result-pop 420ms var(--ease-standard) both;
   }
 
-  .joker-roulette-result-overlay .joker-roulette-result-card {
-    pointer-events: auto;
+  @keyframes joker-roulette-result-pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.92) translateY(var(--spacing-12));
+    }
+
+    68% {
+      opacity: 1;
+      transform: scale(1.03) translateY(0);
+    }
+
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
   }
 
   @media (min-width: 1000px) {

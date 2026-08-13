@@ -1,5 +1,8 @@
+import { GAME_WIN_MODAL_OVERLAY_STYLES } from "../../shared/GameWinModalOverlay.jsx";
+
 export function getHiloPageStyles(gameRoundEndStyles) {
   return `
+${GAME_WIN_MODAL_OVERLAY_STYLES}
 .joker-game-shell .joker-navigation-body {
   max-width: none;
   justify-self: center;
@@ -485,11 +488,11 @@ export function getHiloPageStyles(gameRoundEndStyles) {
   border-radius: 0 0 20px 20px;
   background: var(--joker-black-600);
   color: var(--joker-white-50);
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  line-height: 1;
+  font-family: var(--font-heading);
+  font-size: var(--text-heading-h3);
+  font-weight: var(--text-heading-weight);
+  letter-spacing: 0;
+  line-height: var(--text-heading-line-height-compact);
   text-align: center;
   text-transform: uppercase;
   transform: translateX(-50%);
@@ -498,7 +501,7 @@ export function getHiloPageStyles(gameRoundEndStyles) {
 
 .joker-hilo-game-frame__status strong {
   color: var(--joker-gold-400);
-  font-weight: 600;
+  font-weight: var(--text-heading-weight);
 }
 
 .joker-hilo-main-card-wrap {
@@ -644,21 +647,8 @@ export function getHiloPageStyles(gameRoundEndStyles) {
   text-align: center;
 }
 
-.joker-hilo-result-card {
-  position: absolute;
-  inset: 0;
-  z-index: 40;
-  display: grid;
-  place-items: center;
-  padding: var(--spacing-24);
-  pointer-events: auto;
-  transform: scale(0.96);
-  animation: joker-hilo-result-pop 420ms var(--ease-standard) both;
-}
-
 .joker-hilo-result-card > * {
-  max-width: min(500px, calc(100% - var(--spacing-48)));
-  box-shadow: 0 var(--spacing-24) var(--spacing-64) rgb(0 0 0 / 0.42);
+  animation: joker-hilo-result-pop 420ms var(--ease-standard) both;
 }
 
 @keyframes joker-hilo-result-pop {

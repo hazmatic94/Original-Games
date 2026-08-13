@@ -3,7 +3,6 @@ import {
   Coin,
   CoinProgression,
   GameShell,
-  WinModalCard,
   getCoinReceiverLossTotalMs,
 } from "@joker/design-system";
 import minesCashoutSound from "../../../assets/mines-cashout.mp3?url";
@@ -11,9 +10,11 @@ import {
   GAME_ROUND_END_STYLES,
   GameRoundEndTransition,
 } from "../../shared/gameRoundEnd.jsx";
-import { formatBalance, formatJkcAmount } from "../../shared/formatting.js";
-import { useGameShellBettingPanelLayout } from "../../shared/hooks.js";
+import { formatBalance } from "../../shared/formatting.js";
+import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
 import { playSound } from "../../shared/sounds.js";
+import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
+import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
 import { MobileOddsGroup } from "./MobileOddsGroup.jsx";
 import { PackagedCoinFlipBettingPanel } from "./PackagedCoinFlipBettingPanel.jsx";
 import {
@@ -35,7 +36,8 @@ import { getCoinFlipPageStyles } from "./coinFlipPageStyles.js";
 export function CoinFlipPage({ onGameChange }) {
   const bettingPanelLayout = useGameShellBettingPanelLayout();
   const [betAmount, setBetAmount] = useState("");
-  const [balance] = useState(150000);
+  const [balance, setBalance] = useState(150000);
+  const { deferWinCredit, applyDeferredWinCredit, getDisplayBalance } = useDeferredWinCredit(setBalance);
   const [selectedSide, setSelectedSide] = useState("heads");
   const [roundsToWin, setRoundsToWin] = useState("4");
   const [coinSide, setCoinSide] = useState("heads");
@@ -63,6 +65,7 @@ export function CoinFlipPage({ onGameChange }) {
   const pendingTossRef = useRef(null);
   const selectedSideRef = useRef(selectedSide);
   const hasCoinBetAmount = Number(betAmount) > 0;
+  const numericBetAmount = Number(betAmount) || 0;
   const hasActiveCoinRound = coinRoundStatus === "active";
   const maxRoundsToWin = Number(roundsToWin) || coinFlipMaxWins;
   const settledCoinCount = coinHistory.filter((coin) => coin.didWin).length;
@@ -71,6 +74,7 @@ export function CoinFlipPage({ onGameChange }) {
   const isRoundLocked = hasActiveCoinRound;
   const canStartCoinFlip =
     hasCoinBetAmount &&
+    (hasActiveCoinRound || numericBetAmount <= getDisplayBalance(balance)) &&
     coinHistory.length < maxRoundsToWin &&
     !isCoinFlipping &&
     !coinWinModal &&
@@ -225,6 +229,7 @@ export function CoinFlipPage({ onGameChange }) {
   function closeCoinWinModal() {
     const shouldResetRound = coinWinModalResetRef.current;
 
+    applyDeferredWinCredit();
     clearCoinWinModalTimer();
     setCoinWinModal(null);
     coinWinModalResetRef.current = false;
@@ -250,8 +255,22 @@ export function CoinFlipPage({ onGameChange }) {
     closeCoinWinModal();
   }
 
+  function debitCoinBetForNewRound() {
+    if (hasActiveCoinRound) {
+      return true;
+    }
+
+    if (numericBetAmount <= 0 || numericBetAmount > getDisplayBalance(balance)) {
+      return false;
+    }
+
+    setBalance((currentBalance) => currentBalance - numericBetAmount);
+    return true;
+  }
+
   function handleBetAction() {
     if (!canStartCoinFlip) return;
+    if (!debitCoinBetForNewRound()) return;
 
     clearCoinWinModalTimer();
     setCoinWinModal(null);
@@ -277,6 +296,7 @@ export function CoinFlipPage({ onGameChange }) {
     const cashoutProfit = calculateCoinFlipProfit(betAmount, settledCoinCount);
 
     playSound(minesCashoutSound);
+    deferWinCredit(cashoutProfit);
     showCoinWinModal({
       title: "Cashout Successful",
       profit: cashoutProfit,
@@ -330,6 +350,7 @@ export function CoinFlipPage({ onGameChange }) {
         const winProfit = calculateCoinFlipProfit(betAmount, nextWinCount);
 
         playSound(minesCashoutSound);
+        deferWinCredit(winProfit);
         showCoinWinModal({
           title: "Cashout Successful",
           profit: winProfit,
@@ -371,6 +392,7 @@ export function CoinFlipPage({ onGameChange }) {
     if (tossPhase === "tossing" || !canFlipCoin) return;
 
     if (!hasActiveCoinRound) {
+      if (!debitCoinBetForNewRound()) return;
       clearCoinWinModalTimer();
       setCoinWinModal(null);
       coinWinModalResetRef.current = false;
@@ -394,7 +416,7 @@ export function CoinFlipPage({ onGameChange }) {
     <>
       <style>{getCoinFlipPageStyles(GAME_ROUND_END_STYLES)}</style>
       <GameShell
-        balance={formatBalance(balance)}
+        balance={formatBalance(getDisplayBalance(balance))}
         className="joker-game-shell--coin-flip"
         defaultValue={coinFlipNavigationPreset.defaultValue}
         game={coinFlipNavigationPreset.game}
@@ -511,16 +533,15 @@ export function CoinFlipPage({ onGameChange }) {
                 animationKey={`coin-loss-${coinHistory.length}`}
               />
               {coinWinModal && (
-                <div className="joker-coin-flip-result-card" role="status" aria-live="polite">
-                  <WinModalCard
+                <GameWinModalOverlay className="joker-coin-flip-result-card" role="status" aria-live="polite">
+                  <GameWinModalCard
                     title={coinWinModal.title}
-                    amountWon={`+${formatJkcAmount(coinWinModal.profit)}`}
-                    currency={null}
-                    message="Your winnings from this round have been added to your balance."
-                    closeLabel="Close"
+                    balance={balance}
+                    profit={coinWinModal.profit}
+                    onCoinsLand={applyDeferredWinCredit}
                     onClose={handleCoinWinModalClose}
                   />
-                </div>
+                </GameWinModalOverlay>
               )}
             </div>
           </div>
