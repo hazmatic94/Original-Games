@@ -105,11 +105,17 @@ function redirectMissingBaseSlash() {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const url = req.url?.split('?')[0] ?? '';
+        const query = req.url?.includes('?')
+          ? req.url.slice(req.url.indexOf('?'))
+          : '';
+
+        if (url === '/' || url === '') {
+          res.writeHead(301, { Location: `${appBase}${query}` });
+          res.end();
+          return;
+        }
 
         if (url === baseWithoutSlash) {
-          const query = req.url?.includes('?')
-            ? req.url.slice(req.url.indexOf('?'))
-            : '';
           res.writeHead(301, {Location: `${appBase}${query}`});
           res.end();
           return;
@@ -142,7 +148,7 @@ export default defineConfig({
     host: true,
     allowedHosts: true,
     watch: {
-      ignored: ['!**/DesignSystemGames/**'],
+      ignored: ['!**/DesignSystemJokerShowroom/**'],
     },
     fs: {
       allow: ['..'],

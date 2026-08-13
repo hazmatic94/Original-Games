@@ -1,19 +1,26 @@
 import { useEffect, useRef, useState } from "react";
-import { GameShell } from "@joker/design-system";
+import {
+  BettingPanelSurface,
+  Button,
+  CashoutFooter,
+  GameShell,
+  MobileHiLoOddsGroup,
+  OddsButtonGroup,
+} from "@joker/design-system";
+import "@joker/design-system/styles/button.css";
+import "@joker/design-system/styles/inputs.css";
 import hiloCardDrawSound from "../../../assets/hilo-card-draw.mp3?url";
 import hiloNextSound from "../../../assets/hilo-next.mp3?url";
-import minesBombSound from "../../../assets/mines-bomb.mp3?url";
-import minesCashoutSound from "../../../assets/mines-cashout.mp3?url";
-import minesPlaceBetSound from "../../../assets/mines-placebet.mp3?url";
 import {
   GAME_ROUND_END_RESET_MS,
   GAME_ROUND_END_STYLES,
 } from "../../shared/gameRoundEnd.jsx";
 import { formatBalance } from "../../shared/formatting.js";
+import { playCashoutSound, playLossSound, playPlaceBetSound } from "../../shared/gameSounds.js";
+import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout, useOpenGameMenu } from "../../shared/hooks.js";
 import { playSound } from "../../shared/sounds.js";
 import { HiloStage } from "./HiloStage.jsx";
-import { PackagedHiloBettingPanel } from "./PackagedHiloBettingPanel.jsx";
 import { hiloNavigationPreset } from "./hiloConfig.js";
 import {
   calculateHiloOdds,
@@ -41,8 +48,6 @@ export function HiloPage({ onGameChange }) {
   const [pendingPrediction, setPendingPrediction] = useState("");
   const [skipAvailable, setSkipAvailable] = useState(true);
   const [hiloWinModal, setHiloWinModal] = useState(null);
-  const hiloWinModalTimeoutRef = useRef(null);
-  const hiloWinModalResetRef = useRef(false);
   const hiloRoundResetTimeoutRef = useRef(null);
   const hiloHistoryLengthRef = useRef(history.length);
 
@@ -66,10 +71,6 @@ export function HiloPage({ onGameChange }) {
 
   useEffect(() => {
     return () => {
-      if (hiloWinModalTimeoutRef.current) {
-        window.clearTimeout(hiloWinModalTimeoutRef.current);
-      }
-
       if (hiloRoundResetTimeoutRef.current) {
         window.clearTimeout(hiloRoundResetTimeoutRef.current);
       }
@@ -96,16 +97,8 @@ export function HiloPage({ onGameChange }) {
     }
   }
 
-  function clearHiloWinModalTimer() {
-    if (hiloWinModalTimeoutRef.current) {
-      window.clearTimeout(hiloWinModalTimeoutRef.current);
-      hiloWinModalTimeoutRef.current = null;
-    }
-  }
-
   function resetHiloRound() {
     clearHiloRoundResetTimer();
-    applyDeferredWinCredit();
     const preview = createHiloPreviewState();
     setCurrentCard(preview.currentCard);
     setDeck([]);
@@ -115,31 +108,25 @@ export function HiloPage({ onGameChange }) {
     setPendingPrediction("");
     setSkipAvailable(true);
     setHiloWinModal(null);
-    hiloWinModalResetRef.current = false;
   }
 
   function scheduleHiloRoundReset() {
     clearHiloRoundResetTimer();
     hiloRoundResetTimeoutRef.current = window.setTimeout(() => {
       hiloRoundResetTimeoutRef.current = null;
-      clearHiloWinModalTimer();
       resetHiloRound();
     }, GAME_ROUND_END_RESET_MS);
   }
 
   function closeHiloWinModal() {
     clearHiloRoundResetTimer();
-    clearHiloWinModalTimer();
     applyDeferredWinCredit();
     setHiloWinModal(null);
-    hiloWinModalResetRef.current = false;
     resetHiloRound();
   }
 
   function showHiloWinModal({ title, profit }) {
     setHiloWinModal({ title, profit });
-    clearHiloWinModalTimer();
-    scheduleHiloRoundReset();
   }
 
   function handleHiloWinModalClose() {
@@ -152,6 +139,10 @@ export function HiloPage({ onGameChange }) {
     if (!Number(nextValue)) {
       setPendingPrediction("");
     }
+  }
+
+  function handleBetAmountInputChange(event) {
+    handleBetAmountChange(event.currentTarget.value.replace(/[^\d.]/g, ""));
   }
 
   function handleHiloChoiceSelection(choice) {
@@ -173,12 +164,10 @@ export function HiloPage({ onGameChange }) {
       return;
     }
 
-    clearHiloWinModalTimer();
     clearHiloRoundResetTimer();
     setHiloWinModal(null);
-    hiloWinModalResetRef.current = false;
 
-    playSound(minesPlaceBetSound);
+    playPlaceBetSound();
 
     const nextRound = createHiloRound(currentCard);
 
@@ -208,7 +197,7 @@ export function HiloPage({ onGameChange }) {
 
         if (result.roundStatus === "win") {
           deferWinCredit(result.winProfit);
-          playSound(minesCashoutSound);
+          playCashoutSound();
           showHiloWinModal({
             title: "You Won",
             profit: result.winProfit,
@@ -217,7 +206,7 @@ export function HiloPage({ onGameChange }) {
         }
 
         if (result.roundStatus === "loss") {
-          playSound(minesBombSound);
+          playLossSound();
           scheduleHiloRoundReset();
           return;
         }
@@ -240,7 +229,7 @@ export function HiloPage({ onGameChange }) {
 
     deferWinCredit(currentProfit);
     setRoundStatus("cash-out");
-    playSound(minesCashoutSound);
+    playCashoutSound();
     showHiloWinModal({
       title: "Cashout Successful",
       profit: currentProfit,
@@ -275,7 +264,7 @@ export function HiloPage({ onGameChange }) {
 
     if (result.roundStatus === "win") {
       deferWinCredit(result.winProfit);
-      playSound(minesCashoutSound);
+      playCashoutSound();
       showHiloWinModal({
         title: "You Won",
         profit: result.winProfit,
@@ -284,7 +273,7 @@ export function HiloPage({ onGameChange }) {
     }
 
     if (result.roundStatus === "loss") {
-      playSound(minesBombSound);
+      playLossSound();
       scheduleHiloRoundReset();
     }
   }
@@ -320,13 +309,25 @@ export function HiloPage({ onGameChange }) {
     if (remainingDeck.length === 0 && currentProfit > 0) {
       deferWinCredit(currentProfit);
       setRoundStatus("win");
-      playSound(minesCashoutSound);
+      playCashoutSound();
       showHiloWinModal({
         title: "You Won",
         profit: currentProfit,
       });
     }
   }
+
+  const isMobileBettingPanel = bettingPanelLayout === "mobile";
+  const awaitingHiloChoice = !gameInPlay && hasBetAmount && !pendingPrediction;
+  const oddsDisabled = !gameInPlay && !isMobileBettingPanel && !hasBetAmount;
+  const panelClassName = [
+    "joker-hilo-betting-panel",
+    !gameInPlay ? "is-hilo-pre-game" : "",
+    !gameInPlay && hasBetAmount ? "is-hilo-pre-game-ready" : "",
+    awaitingHiloChoice ? "is-awaiting-hilo-choice" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <>
@@ -339,23 +340,73 @@ export function HiloPage({ onGameChange }) {
         onValueChange={onGameChange}
         value={hiloNavigationPreset.selectedValue}
         bettingPanel={
-          <PackagedHiloBettingPanel
-            awaitingHiloChoice={!gameInPlay && hasBetAmount && !pendingPrediction}
-            betAmount={betAmount}
-            gameInPlay={gameInPlay}
-            hasBetAmount={hasBetAmount}
-            higherOdds={formatHiloPercent(displayOdds.higherPercent)}
-            layout={bettingPanelLayout}
-            lowerOdds={formatHiloPercent(displayOdds.lowerPercent)}
-            onBetAmountChange={handleBetAmountChange}
-            onCashout={handleCashout}
-            onPlaceBet={handlePlaceBet}
-            onHigherSame={() => handleHiloChoiceSelection("higher")}
-            onLowerSame={() => handleHiloChoiceSelection("lower")}
-            onSkipCard={handleSkipCard}
-            selectedOddsValue={pendingPrediction}
-            skipAvailable={skipAvailable}
-          />
+          <div className="joker-hilo-betting-panel-host">
+            <BettingPanelSurface
+              ariaLabel={
+                isMobileBettingPanel ? "HiLo mobile betting panel" : "HiLo betting panel"
+              }
+              className={panelClassName}
+              layout={bettingPanelLayout}
+              betAmount={betAmount}
+              onBetAmountChange={handleBetAmountInputChange}
+              onPlaceBet={handlePlaceBet}
+              disablePlaceBetUntilBetAmount
+              footer={
+                gameInPlay ? <CashoutFooter onCashout={handleCashout} /> : undefined
+              }
+            >
+              {isMobileBettingPanel ? (
+                <MobileHiLoOddsGroup
+                  className="joker-hilo-betting-actions"
+                  disabled={oddsDisabled}
+                  lowerOdds={formatHiloPercent(displayOdds.lowerPercent)}
+                  higherOdds={formatHiloPercent(displayOdds.higherPercent)}
+                  onLowerSame={() => handleHiloChoiceSelection("lower")}
+                  onHigherSame={() => handleHiloChoiceSelection("higher")}
+                  onValueChange={setPendingPrediction}
+                  value={pendingPrediction}
+                />
+              ) : (
+                <OddsButtonGroup
+                  className="joker-hilo-betting-actions"
+                  ariaLabel="HiLo choice"
+                  layout="stacked"
+                  showOdds={false}
+                  showDirection
+                  value={pendingPrediction}
+                  onValueChange={setPendingPrediction}
+                  disabled={oddsDisabled}
+                  options={[
+                    {
+                      value: "lower",
+                      label: "Lower / Same",
+                      odds: formatHiloPercent(displayOdds.lowerPercent),
+                      direction: "down",
+                      onClick: () => handleHiloChoiceSelection("lower"),
+                    },
+                    {
+                      value: "higher",
+                      label: "Higher / Same",
+                      odds: formatHiloPercent(displayOdds.higherPercent),
+                      direction: "up",
+                      onClick: () => handleHiloChoiceSelection("higher"),
+                    },
+                  ]}
+                />
+              )}
+
+              {gameInPlay ? (
+                <Button
+                  variant="secondary"
+                  fullWidth
+                  className="joker-cta-preview secondary full-width"
+                  onClick={handleSkipCard}
+                >
+                  {skipAvailable ? "Skip Card" : "Skip Used"}
+                </Button>
+              ) : null}
+            </BettingPanelSurface>
+          </div>
         }
       >
         <HiloStage

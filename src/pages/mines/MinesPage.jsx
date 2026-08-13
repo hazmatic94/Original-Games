@@ -1,17 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { GameShell } from "@joker/design-system";
-import minesBombSound from "../../../assets/mines-bomb.mp3?url";
-import minesCashoutSound from "../../../assets/mines-cashout.mp3?url";
-import minesPlaceBetSound from "../../../assets/mines-placebet.mp3?url";
+import {
+  BettingPanelSurface,
+  GameShell,
+  GoldNuggetsInput,
+  MinesInGameCard,
+  MinesInGameOverlay,
+  Select,
+} from "@joker/design-system";
+import "@joker/design-system/styles/button.css";
+import "@joker/design-system/styles/inputs.css";
+import dynamiteIconSrc from "../../../assets/mines-bomb.png?url";
 import {
   GAME_ROUND_END_RESET_MS,
   GAME_ROUND_END_STYLES,
 } from "../../shared/gameRoundEnd.jsx";
-import { formatBalance } from "../../shared/formatting.js";
+import { formatBalance, formatCurrency } from "../../shared/formatting.js";
+import { playCashoutSound, playLossSound, playPlaceBetSound } from "../../shared/gameSounds.js";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout, useOpenGameMenu } from "../../shared/hooks.js";
-import { playSound } from "../../shared/sounds.js";
 import { MinesGrid } from "./MinesGrid.jsx";
-import { PackagedMinesBettingPanel } from "./PackagedMinesBettingPanel.jsx";
 import {
   desktopMinesGrid,
   minTileAmount,
@@ -30,6 +36,22 @@ import {
 } from "./minesGameLogic.jsx";
 import { getMinesPageStyles } from "./minesPageStyles.js";
 
+const dynamiteIcon = <img className="joker-dynamite-icon" src={dynamiteIconSrc} alt="" />;
+
+function formatMinesAmountLabel(count) {
+  return `${count} ${count === 1 ? "Mine" : "Mines"}`;
+}
+
+function getGoldNuggets(mines, tileCount) {
+  const minesCount = Number.parseInt(mines, 10);
+
+  if (!Number.isFinite(minesCount)) {
+    return String(tileCount - 1);
+  }
+
+  return String(Math.max(0, tileCount - minesCount));
+}
+
 export function MinesPage({ onGameChange }) {
   const bettingPanelLayout = useGameShellBettingPanelLayout();
   const minesGrid = bettingPanelLayout === "mobile" ? mobileMinesGrid : desktopMinesGrid;
@@ -40,7 +62,6 @@ export function MinesPage({ onGameChange }) {
     () => createMinesAmountOptions(maxTileAmount),
     [maxTileAmount]
   );
-  const [bettingMode, setBettingMode] = useState("manual");
   const [betAmount, setBetAmount] = useState("");
   const [balance, setBalance] = useState(150000);
   const { deferWinCredit, applyDeferredWinCredit, getDisplayBalance } = useDeferredWinCredit(setBalance);
@@ -120,6 +141,7 @@ export function MinesPage({ onGameChange }) {
     setLossResult(false);
 
     if (shouldResetCashout) {
+      applyDeferredWinCredit();
       dismissCashoutResult();
       return;
     }
@@ -158,6 +180,7 @@ export function MinesPage({ onGameChange }) {
       setShieldActive(false);
       setLossResult(true);
       setMessage("");
+      playLossSound();
 
       clearResultTimer();
       resultResetTimeout.current = window.setTimeout(
@@ -173,37 +196,14 @@ export function MinesPage({ onGameChange }) {
     }, 1500);
   }
 
-  function handleBetAction() {
-    if (roundStatus === "cashedOut") {
-      return;
-    }
-
-    if (gameInPlay) {
-      playSound(minesCashoutSound);
-      deferWinCredit(currentProfit);
-      setCashoutResult({
-        multiplier,
-        profit: currentProfit,
-      });
-      setRoundStatus("cashedOut");
-      setFreshRevealedTiles([]);
-      setShieldActive(false);
-      setShieldUsed(false);
-      setLossResult(false);
-      setMessage("");
-
-      clearResultTimer();
-      resultResetTimeout.current = window.setTimeout(dismissCashoutResult, 3000);
-      return;
-    }
-
-    if (numericBetAmount <= 0 || numericBetAmount > balance) {
+  function startNewRound(availableBalance = getDisplayBalance(balance)) {
+    if (numericBetAmount <= 0 || numericBetAmount > availableBalance) {
       setMessage("Enter a valid bet amount");
-      return;
+      return false;
     }
 
     const nextBoard = createRoundBoard(activeMineCount, mineTiles);
-    playSound(minesPlaceBetSound);
+    playPlaceBetSound();
 
     clearResultTimer();
 
@@ -217,7 +217,57 @@ export function MinesPage({ onGameChange }) {
     setCashoutResult(null);
     setLossResult(false);
     setMessage("");
+    return true;
   }
+
+  function handleBetAction() {
+    if (roundStatus === "cashedOut") {
+      clearResultTimer();
+      const availableBalance = getDisplayBalance(balance);
+      applyDeferredWinCredit();
+      dismissCashoutResult();
+      startNewRound(availableBalance);
+      return;
+    }
+
+    if (gameInPlay) {
+      playCashoutSound();
+      deferWinCredit(currentProfit);
+      setCashoutResult({
+        multiplier,
+        profit: currentProfit,
+      });
+      setRoundStatus("cashedOut");
+      setFreshRevealedTiles([]);
+      setShieldActive(false);
+      setShieldUsed(false);
+      setLossResult(false);
+      setMessage("");
+
+      clearResultTimer();
+      return;
+    }
+
+    startNewRound();
+  }
+
+  function handleBetAmountChange(event) {
+    setBetAmount(event.currentTarget.value.replace(/[^\d.]/g, ""));
+  }
+
+  function handleMinesAmountChange(nextValue) {
+    setMines(String(clampTileAmount(nextValue, maxTileAmount)));
+  }
+
+  const isMobileBettingPanel = bettingPanelLayout === "mobile";
+  const minesInGameCard = (
+    <MinesInGameCard
+      currentProfit={formatCurrency(currentProfit)}
+      nextValue={formatCurrency(nextProfit)}
+      currentMultiplier={`${multiplier.toFixed(2)}x`}
+      nextMultiplier={`${nextMultiplier.toFixed(2)}x`}
+    />
+  );
 
   return (
     <>
@@ -230,23 +280,66 @@ export function MinesPage({ onGameChange }) {
         onValueChange={onGameChange}
         value={minesNavigationPreset.selectedValue}
         bettingPanel={
-          <PackagedMinesBettingPanel
-            betAmount={betAmount}
-            bettingMode={bettingMode}
-            currentProfit={currentProfit}
-            gameInPlay={gameInPlay}
-            layout={bettingPanelLayout}
-            mines={mines}
-            maxTileAmount={maxTileAmount}
-            minesAmountOptions={minesAmountOptions}
-            multiplier={multiplier}
-            nextMultiplier={nextMultiplier}
-            nextProfit={nextProfit}
-            onBetAmountChange={setBetAmount}
-            onMinesChange={setMines}
-            onModeChange={setBettingMode}
-            onPlaceBet={handleBetAction}
-          />
+          <div
+            className={
+              gameInPlay && !isMobileBettingPanel
+                ? "joker-mines-betting-panel-host is-ingame"
+                : "joker-mines-betting-panel-host"
+            }
+          >
+            <BettingPanelSurface
+              ariaLabel={
+                isMobileBettingPanel
+                  ? "Mines mobile betting panel"
+                  : "Mines betting panel"
+              }
+              className="joker-mines-betting-panel"
+              layout={bettingPanelLayout}
+              betAmount={betAmount}
+              onBetAmountChange={handleBetAmountChange}
+              onPlaceBet={handleBetAction}
+              inGame={gameInPlay}
+              disablePlaceBetUntilBetAmount
+              footer={
+                gameInPlay && isMobileBettingPanel ? (
+                  <MinesInGameOverlay layout={bettingPanelLayout} onCashout={handleBetAction}>
+                    {minesInGameCard}
+                  </MinesInGameOverlay>
+                ) : undefined
+              }
+            >
+              <div className="joker-mines-betting-field-group joker-betting-field-group">
+                <Select
+                  className="joker-bet-field joker-dynamite-input"
+                  fullWidth
+                  label="Dynamite"
+                  leftIcon={dynamiteIcon}
+                  options={minesAmountOptions}
+                  value={mines}
+                  onChange={handleMinesAmountChange}
+                  renderValue={(option) => {
+                    const count = Number.parseInt(option?.value ?? mines, 10);
+                    return Number.isFinite(count) ? formatMinesAmountLabel(count) : option?.label;
+                  }}
+                />
+                <GoldNuggetsInput
+                  className="joker-bet-field"
+                  fullWidth
+                  label="Gold bars"
+                  value={getGoldNuggets(mines, minesTileCount)}
+                />
+              </div>
+            </BettingPanelSurface>
+            {gameInPlay && !isMobileBettingPanel ? (
+              <MinesInGameOverlay
+                className="joker-mines-betting-panel-overlay"
+                layout={bettingPanelLayout}
+                onCashout={handleBetAction}
+              >
+                {minesInGameCard}
+              </MinesInGameOverlay>
+            ) : null}
+          </div>
         }
       >
         <MinesGrid

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { GameRoundEndTransition } from "../../shared/gameRoundEnd.jsx";
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
+import { formatCurrency } from "../../shared/formatting.js";
 import {
   MINES_PAGE_LOAD_ANIMATION_MS,
   MINES_PAGE_LOAD_ROW_BASE_DELAY_MS,
@@ -99,6 +100,7 @@ export function FourDMinesGrid({
           <GameWinModalOverlay className="joker-mines-result-card" role="status" aria-live="polite">
             <GameWinModalCard
               title="Cashout Successful"
+              amountWon={formatCurrency(cashoutResult.profit)}
               balance={balance}
               profit={cashoutResult.profit}
               onCoinsLand={onWinCoinsLand}

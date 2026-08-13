@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GameShell } from "@joker/design-system";
-import minesCashoutSound from "../../../assets/mines-cashout.mp3?url";
-import { formatBalance } from "../../shared/formatting.js";
-import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
-import { playSound } from "../../shared/sounds.js";
+import { formatBalance, formatCurrency } from "../../shared/formatting.js";
+import { playCashoutSound, playLossSound, playPlaceBetSound } from "../../shared/gameSounds.js";
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
+import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
 import { PackagedCrashBettingPanel } from "./PackagedCrashBettingPanel.jsx";
 import {
   crashGraphDurationSeconds,
@@ -93,6 +92,7 @@ export function CrashPage({ onGameChange }) {
       const nextMultiplier = Math.min(getCrashMultiplierAt(elapsedMs), crashRound.crashPoint);
 
       if (elapsedMs >= crashRound.crashTimeMs || nextMultiplier >= crashRound.crashPoint) {
+        playLossSound();
         setCrashRound((currentRound) => ({
           ...currentRound,
           status: "crashed",
@@ -126,10 +126,9 @@ export function CrashPage({ onGameChange }) {
   }, [crashRound.status, crashRound.crashTimeMs, crashRound.crashPoint]);
 
   useEffect(() => {
-    if (!crashResult) return undefined;
+    if (!crashResult || crashResult.type === "win") return undefined;
 
     const timer = window.setTimeout(() => {
-      applyDeferredWinCredit();
       setCrashResult(null);
       setCrashResetting(false);
       setRoundStatus("idle");
@@ -165,6 +164,7 @@ export function CrashPage({ onGameChange }) {
 
     if (roundStatus === "active") {
       const payout = numericBetAmount * crashRound.multiplier;
+      playCashoutSound();
       setRoundStatus("cashedOut");
       setCrashResetting(true);
       setCrashRound((currentRound) => ({
@@ -181,6 +181,7 @@ export function CrashPage({ onGameChange }) {
     }
 
     const nextRound = createCrashRound();
+    playPlaceBetSound();
     crashStartRef.current = performance.now();
     setCrashResult(null);
     setBalance((currentBalance) => Math.max(0, currentBalance - numericBetAmount));
@@ -342,6 +343,7 @@ export function CrashPage({ onGameChange }) {
                   <GameWinModalCard
                     className="joker-crash-result-card"
                     title="Cashout Successful"
+                    amountWon={formatCurrency(crashResult.amount)}
                     balance={balance}
                     profit={crashResult.amount}
                     message={`Cashed out at ${formatCrashMultiplier(crashResult.multiplier)}. Added to your balance.`}

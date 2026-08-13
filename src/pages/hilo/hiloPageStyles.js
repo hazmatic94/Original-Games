@@ -17,6 +17,11 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   justify-self: stretch;
 }
 
+.joker-hilo-betting-panel-host {
+  height: 100%;
+  min-height: 0;
+}
+
 .joker-hilo-betting-panel.is-hilo-pre-game .joker-hilo-betting-actions {
   cursor: not-allowed;
 }
@@ -38,6 +43,16 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
 
 .joker-hilo-betting-panel .joker-hilo-betting-actions .joker-hi-lo-odds {
   gap: var(--spacing-8);
+}
+
+.joker-hilo-betting-panel .joker-odds-button-group button:disabled {
+  border-color: var(--button-hi-lo-border);
+  background: var(--button-hi-lo-bg);
+  box-shadow: none;
+  color: var(--button-hi-lo-text);
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
 }
 
 @media (min-width: 1000px) {
@@ -84,10 +99,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   height: 100%;
   min-height: 0;
   box-sizing: border-box;
-  --hilo-betting-divider-offset: calc(
-    var(--spacing-32) + calc(var(--body-12) * var(--text-body-line-height)) +
-      var(--spacing-8) + var(--input-control-height) + var(--spacing-24)
-  );
+  --hilo-betting-divider-offset: var(--betting-panel-bet-field-stack-offset);
   --hilo-sync-history-rail-height: var(--hilo-betting-divider-offset);
   --hilo-sync-divider-band: calc(
     var(--hilo-betting-divider-offset) + var(--border-width-default)
@@ -1100,7 +1112,6 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
 
   .joker-hilo-mobile-odds .joker-odds-button-group.is-inline {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--spacing-8);
   }
 
   .joker-hilo-mobile-odds button {

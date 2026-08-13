@@ -18,6 +18,16 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
     min-height: 0;
   }
 
+  .joker-roulette-betting-panel .joker-odds-button-group button:disabled {
+    border-color: var(--button-hi-lo-border);
+    background: var(--button-hi-lo-bg);
+    box-shadow: none;
+    color: var(--button-hi-lo-text);
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
   .joker-roulette-game-frame {
     position: relative;
     display: flex;
@@ -29,10 +39,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
     box-sizing: border-box;
     overflow: hidden;
     background: var(--joker-black-800);
-    --roulette-betting-divider-offset: calc(
-      var(--spacing-32) + calc(var(--body-12) * var(--text-body-line-height)) +
-        var(--spacing-8) + var(--input-control-height) + var(--spacing-24)
-    );
+    --roulette-betting-divider-offset: var(--betting-panel-bet-field-stack-offset);
     --roulette-sync-streak-rail-height: var(--roulette-betting-divider-offset);
     --roulette-win-streak-chip-size: ${ROULETTE_WIN_CHIP_SIZE}px;
     --roulette-streak-rail-content-height: calc(
@@ -43,6 +50,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
     );
     --roulette-celebration-bleed-top: 96px;
     --roulette-win-streak-layer: 8;
+    --roulette-edge-fade-layer: 6;
     --roulette-mobile-odds-layer: 20;
   }
 
@@ -106,7 +114,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
     left: 0;
     bottom: 0;
     width: 140px;
-    z-index: 6;
+    z-index: var(--roulette-edge-fade-layer);
     pointer-events: none;
     display: none;
     background: linear-gradient(
@@ -407,7 +415,6 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
 
     .joker-roulette-game-frame__stage {
       position: relative;
-      z-index: 7;
     }
 
     .joker-roulette-mobile-odds {
@@ -436,13 +443,13 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
       pointer-events: auto;
     }
 
-    .joker-roulette-game-frame .joker-roulette-wheel-edge-fade:not(.joker-roulette-wheel-edge-fade--bottom) {
-      display: none;
+    .joker-roulette-game-frame__stage .joker-roulette-wheel-edge-fade:not(.joker-roulette-wheel-edge-fade--bottom) {
+      display: block;
     }
 
-    .joker-roulette-game-frame .joker-roulette-wheel-edge-fade--bottom {
+    .joker-roulette-game-frame__stage .joker-roulette-wheel-edge-fade--bottom {
       display: block;
-      z-index: 5;
+      z-index: var(--roulette-edge-fade-layer);
     }
   }
 ${gameRoundEndStyles}

@@ -189,7 +189,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   left: 48%;
   transform: translate(-50%, -50%);
   color: var(--joker-white-50);
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: var(--text-display-d1, var(--display-d1));
   font-weight: var(--text-display-weight);
   line-height: var(--text-display-line-height-compact);
