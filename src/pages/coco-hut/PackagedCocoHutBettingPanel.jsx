@@ -1,4 +1,5 @@
 import { CocoHutBettingPanel as JokerCocoHutBettingPanel } from "@joker/design-system";
+import { sanitizeBetAmountInput } from "../../shared/formatting.js";
 
 export function PackagedCocoHutBettingPanel({
   betAmount,
@@ -9,7 +10,7 @@ export function PackagedCocoHutBettingPanel({
   onPlaceBet,
 }) {
   function handleBetAmountChange(event) {
-    onBetAmountChange(event.currentTarget.value.replace(/[^\d.]/g, ""));
+    onBetAmountChange(sanitizeBetAmountInput(event.currentTarget.value));
   }
 
   return (

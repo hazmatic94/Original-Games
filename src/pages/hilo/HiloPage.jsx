@@ -9,16 +9,15 @@ import {
 import "@joker/design-system/styles/button.css";
 import "@joker/design-system/styles/inputs.css";
 import hiloCardDrawSound from "../../../assets/hilo-card-draw.mp3?url";
-import hiloNextSound from "../../../assets/hilo-next.mp3?url";
+import hiloCardLandSound from "../../../assets/hilo-card-land.mp3?url";
 import {
   GAME_ROUND_END_RESET_MS,
   GAME_ROUND_END_STYLES,
 } from "../../shared/gameRoundEnd.jsx";
-import { formatBalance } from "../../shared/formatting.js";
-import { playCashoutSound, playLossSound, playPlaceBetSound } from "../../shared/gameSounds.js";
+import { formatBalance, sanitizeBetAmountInput } from "../../shared/formatting.js";
+import { cancelSoundCues, playCashoutSound, playFoley, playPlaceBetSound, playResolveCue } from "../../shared/gameSounds.js";
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout, useOpenGameMenu } from "../../shared/hooks.js";
-import { playSound } from "../../shared/sounds.js";
 import { HiloStage } from "./HiloStage.jsx";
 import { hiloNavigationPreset } from "./hiloConfig.js";
 import {
@@ -34,6 +33,8 @@ import {
   updateHiloHistory,
 } from "./hiloGameLogic.js";
 import { getHiloPageStyles } from "./hiloPageStyles.js";
+
+const HILO_CARD_LAND_MS = 400;
 
 export function HiloPage({ onGameChange }) {
   const [betAmount, setBetAmount] = useState("");
@@ -73,6 +74,7 @@ export function HiloPage({ onGameChange }) {
       if (hiloRoundResetTimeoutRef.current) {
         window.clearTimeout(hiloRoundResetTimeoutRef.current);
       }
+      cancelSoundCues();
     };
   }, []);
 
@@ -96,8 +98,25 @@ export function HiloPage({ onGameChange }) {
     }
   }
 
+  function playHiloDrawSound() {
+    playFoley(hiloCardDrawSound);
+  }
+
+  function scheduleHiloCardLand(outcome, { opening = false } = {}) {
+    const sting =
+      outcome === "loss" ? "loss" : outcome === "win" ? "cashout" : outcome === "active" ? "multiplier" : null;
+
+    playResolveCue({
+      opening,
+      foley: hiloCardLandSound,
+      foleyAt: opening ? 520 : HILO_CARD_LAND_MS,
+      sting,
+    });
+  }
+
   function resetHiloRound() {
     clearHiloRoundResetTimer();
+    cancelSoundCues();
     const preview = createHiloPreviewState();
     setCurrentCard(preview.currentCard);
     setDeck([]);
@@ -141,7 +160,7 @@ export function HiloPage({ onGameChange }) {
   }
 
   function handleBetAmountInputChange(event) {
-    handleBetAmountChange(event.currentTarget.value.replace(/[^\d.]/g, ""));
+    handleBetAmountChange(sanitizeBetAmountInput(event.currentTarget.value));
   }
 
   function handleHiloChoiceSelection(choice) {
@@ -194,9 +213,10 @@ export function HiloPage({ onGameChange }) {
         setMultiplier(result.multiplier);
         setRoundStatus(result.roundStatus);
 
+        scheduleHiloCardLand(result.roundStatus, { opening: true });
+
         if (result.roundStatus === "win") {
           deferWinCredit(result.winProfit);
-          playCashoutSound();
           showHiloWinModal({
             title: "You Won",
             profit: result.winProfit,
@@ -205,7 +225,6 @@ export function HiloPage({ onGameChange }) {
         }
 
         if (result.roundStatus === "loss") {
-          playLossSound();
           scheduleHiloRoundReset();
           return;
         }
@@ -240,7 +259,7 @@ export function HiloPage({ onGameChange }) {
       return;
     }
 
-    playSound(hiloCardDrawSound);
+    playHiloDrawSound();
 
     const result = runHiloPrediction(choice, {
       currentCard,
@@ -260,10 +279,10 @@ export function HiloPage({ onGameChange }) {
     setHistory(result.history);
     setMultiplier(result.multiplier);
     setRoundStatus(result.roundStatus);
+    scheduleHiloCardLand(result.roundStatus);
 
     if (result.roundStatus === "win") {
       deferWinCredit(result.winProfit);
-      playCashoutSound();
       showHiloWinModal({
         title: "You Won",
         profit: result.winProfit,
@@ -272,14 +291,14 @@ export function HiloPage({ onGameChange }) {
     }
 
     if (result.roundStatus === "loss") {
-      playLossSound();
       scheduleHiloRoundReset();
     }
   }
 
   function handleSkipCard() {
     if (roundStatus === "pre-game") {
-      playSound(hiloNextSound);
+      playHiloDrawSound();
+      scheduleHiloCardLand();
       const preview = createHiloPreviewState();
       setCurrentCard(preview.currentCard);
       setHistory(preview.history);
@@ -290,9 +309,12 @@ export function HiloPage({ onGameChange }) {
       return;
     }
 
-    playSound(hiloNextSound);
+    playHiloDrawSound();
 
     const [nextCard, ...remainingDeck] = deck;
+    const autoWin = remainingDeck.length === 0 && currentProfit > 0;
+
+    scheduleHiloCardLand(autoWin ? "win" : undefined);
 
     setCurrentCard(nextCard);
     setDeck(remainingDeck);
@@ -305,10 +327,9 @@ export function HiloPage({ onGameChange }) {
     );
     setSkipAvailable(false);
 
-    if (remainingDeck.length === 0 && currentProfit > 0) {
+    if (autoWin) {
       deferWinCredit(currentProfit);
       setRoundStatus("win");
-      playCashoutSound();
       showHiloWinModal({
         title: "You Won",
         profit: currentProfit,
@@ -360,7 +381,7 @@ export function HiloPage({ onGameChange }) {
                 layout="stacked"
                 showOdds={false}
                 showDirection
-                value={pendingPrediction}
+                value={oddsDisabled ? "" : pendingPrediction}
                 onValueChange={(value) => {
                   if (oddsDisabled) return;
                   setPendingPrediction(value);

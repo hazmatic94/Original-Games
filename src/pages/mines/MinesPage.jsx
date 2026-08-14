@@ -14,8 +14,8 @@ import {
   GAME_ROUND_END_RESET_MS,
   GAME_ROUND_END_STYLES,
 } from "../../shared/gameRoundEnd.jsx";
-import { formatBalance, formatCurrency } from "../../shared/formatting.js";
-import { playCashoutSound, playLossSound, playPlaceBetSound } from "../../shared/gameSounds.js";
+import { formatBalance, formatCurrency, sanitizeBetAmountInput } from "../../shared/formatting.js";
+import { playCashoutSound, playPlaceBetSound, playResolveCue } from "../../shared/gameSounds.js";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout, useOpenGameMenu } from "../../shared/hooks.js";
 import { MinesGrid } from "./MinesGrid.jsx";
 import {
@@ -180,7 +180,7 @@ export function MinesPage({ onGameChange }) {
       setShieldActive(false);
       setLossResult(true);
       setMessage("");
-      playLossSound();
+      playResolveCue({ sting: "loss" });
 
       clearResultTimer();
       resultResetTimeout.current = window.setTimeout(
@@ -252,7 +252,7 @@ export function MinesPage({ onGameChange }) {
   }
 
   function handleBetAmountChange(event) {
-    setBetAmount(event.currentTarget.value.replace(/[^\d.]/g, ""));
+    setBetAmount(sanitizeBetAmountInput(event.currentTarget.value));
   }
 
   function handleMinesAmountChange(nextValue) {

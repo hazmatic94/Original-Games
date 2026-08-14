@@ -1,4 +1,5 @@
 import { CrashBettingPanel as JokerCrashBettingPanel } from "@joker/design-system";
+import { sanitizeBetAmountInput } from "../../shared/formatting.js";
 
 export function PackagedCrashBettingPanel({
   betAmount,
@@ -12,7 +13,7 @@ export function PackagedCrashBettingPanel({
   onPlaceBet,
 }) {
   function handleBetAmountChange(event) {
-    onBetAmountChange(event.currentTarget.value.replace(/[^\d.]/g, ""));
+    onBetAmountChange(sanitizeBetAmountInput(event.currentTarget.value));
   }
 
   function handleNumberOfBetsChange(event) {

@@ -18,13 +18,21 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
     min-height: 0;
   }
 
-  .joker-roulette-betting-panel .joker-odds-button-group button:disabled {
+  .joker-roulette-betting-panel .joker-odds-button-group button:disabled,
+  .joker-roulette-betting-panel .joker-odds-button-group button.is-selected:disabled,
+  .joker-roulette-betting-panel .joker-odds-button-group button[aria-pressed="true"]:disabled,
+  .joker-roulette-mobile-odds .joker-odds-button-group button:disabled,
+  .joker-roulette-mobile-odds .joker-odds-button-group button.is-selected:disabled,
+  .joker-roulette-mobile-odds .joker-odds-button-group button[aria-pressed="true"]:disabled {
     border-color: var(--button-hi-lo-border);
     background: var(--button-hi-lo-bg);
+    background-color: var(--button-hi-lo-bg);
+    background-image: none;
     box-shadow: none;
     color: var(--button-hi-lo-text);
     opacity: 0.4;
     cursor: not-allowed;
+    pointer-events: none;
     transform: none;
   }
 

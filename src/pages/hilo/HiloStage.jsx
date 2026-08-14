@@ -165,7 +165,7 @@ export function HiloStage({
                 higherOdds={higherOdds}
                 onLowerSame={onLowerSame}
                 onHigherSame={onHigherSame}
-                value={pendingPrediction}
+                value={choiceInteractive ? pendingPrediction : ""}
               />
             </div>
           )}

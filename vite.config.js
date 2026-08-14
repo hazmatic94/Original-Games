@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react';
-import {existsSync} from 'node:fs';
+import {existsSync, realpathSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {defineConfig} from 'vitest/config';
 
@@ -12,7 +12,7 @@ const bundledDesignSystemRoot = fileURLToPath(
 );
 const useLocalDesignSystem = existsSync(`${localDesignSystemRoot}/dist/index.js`);
 const designSystemRoot = useLocalDesignSystem
-  ? localDesignSystemRoot
+  ? realpathSync(localDesignSystemRoot)
   : bundledDesignSystemRoot;
 
 function isDesignSystemRouletteImporter(importer) {
@@ -84,28 +84,6 @@ function repairIncompleteRouletteWheelBuild() {
   };
 }
 
-function overrideDesignSystemNavigationData() {
-  const overridePath = fileURLToPath(
-    new URL('./src/data/shellNavigationData.js', import.meta.url),
-  );
-
-  return {
-    name: 'original-games-nav-without-4d-mines',
-    enforce: 'pre',
-    resolveId(source, importer) {
-      if (
-        source.endsWith('/data/navigationData.js') &&
-        (importer?.includes('/Joker-DS/') ||
-          importer?.includes('/@joker/design-system/'))
-      ) {
-        return overridePath;
-      }
-
-      return null;
-    },
-  };
-}
-
 function bundleDesignSystemSoundAssets() {
   return {
     name: 'bundle-design-system-sound-assets',
@@ -159,7 +137,6 @@ function redirectMissingBaseSlash() {
 export default defineConfig({
   plugins: [
     react(),
-    overrideDesignSystemNavigationData(),
     bundleDesignSystemSoundAssets(),
     repairIncompleteRouletteWheelBuild(),
     redirectMissingBaseSlash(),
@@ -181,7 +158,7 @@ export default defineConfig({
       ignored: ['!**/Joker-DS/**'],
     },
     fs: {
-      allow: ['..'],
+      allow: ['..', designSystemRoot],
     },
   },
   optimizeDeps: {
@@ -209,12 +186,6 @@ export default defineConfig({
             },
           ]
         : []),
-      {
-        find: `${designSystemRoot}/dist/data/navigationData.js`,
-        replacement: fileURLToPath(
-          new URL('./src/data/shellNavigationData.js', import.meta.url),
-        ),
-      },
     ],
   },
 });

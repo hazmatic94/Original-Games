@@ -1,3 +1,7 @@
+export function sanitizeBetAmountInput(value) {
+  return String(value ?? "").replace(/[^\d.]/g, "").replace(/^0+(?=\d)/, "");
+}
+
 export function roundJkcAmount(value) {
   return Math.round(Number(value) || 0);
 }

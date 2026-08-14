@@ -634,7 +634,13 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
 
 .joker-hilo-prediction-card-slot .joker-hilo-prediction-card.is-selected.joker-lower-card,
 .joker-hilo-prediction-card-slot .joker-hilo-prediction-card.is-selected.joker-higher-card {
-  background: linear-gradient(180deg, var(--joker-black-500) 0%, var(--joker-black-200) 100%);
+  background: var(--joker-black-700);
+  box-shadow: 0 0 0 var(--border-width-default) var(--joker-black-100);
+}
+
+.joker-hilo-prediction-card-slot .joker-hilo-prediction-card.is-selected .joker-higher-card__inner,
+.joker-hilo-prediction-card-slot .joker-hilo-prediction-card.is-selected .joker-lower-card__inner {
+  background: var(--joker-black-700);
 }
 
 .joker-hilo-prediction-support {

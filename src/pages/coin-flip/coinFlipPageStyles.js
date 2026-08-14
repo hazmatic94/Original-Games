@@ -392,7 +392,12 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   transition: opacity 220ms ease;
 }
 
-.joker-coin-flip-betting-panel .joker-odds-button-group button:disabled {
+.joker-coin-flip-betting-panel .joker-odds-button-group button:disabled,
+.joker-coin-flip-betting-panel .joker-odds-button-group button.is-selected:disabled,
+.joker-coin-flip-betting-panel .joker-odds-button-group button[aria-pressed="true"]:disabled,
+.joker-coin-flip-mobile-odds .joker-odds-button-group button:disabled,
+.joker-coin-flip-mobile-odds .joker-odds-button-group button.is-selected:disabled,
+.joker-coin-flip-mobile-odds .joker-odds-button-group button[aria-pressed="true"]:disabled {
   border-color: var(--button-hi-lo-border);
   background: var(--button-hi-lo-bg);
   box-shadow: none;
@@ -400,6 +405,18 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   opacity: 0.4;
   cursor: not-allowed;
   transform: none;
+}
+
+.joker-game-shell--coin-flip .joker-coin-flip-betting-panel .joker-odds-button-group:not(.is-inline) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.joker-game-shell--coin-flip .joker-coin-flip-betting-panel .joker-odds-button-group:not(.is-inline) .joker-hi-lo-odds {
+  display: inline-flex;
+}
+
+.joker-game-shell--coin-flip .joker-coin-flip-betting-panel .joker-odds-button-group-field > .joker-input-label {
+  display: block;
 }
 
 .joker-coin-flip-betting-panel.is-round-locked .joker-bet-field {

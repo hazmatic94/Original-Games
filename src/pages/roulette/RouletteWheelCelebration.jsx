@@ -1,8 +1,5 @@
 import { useEffect, useRef } from "react";
-import {
-  playCoinReceiverWinSound,
-} from "@joker/design-system";
-import { playLossSound } from "../../shared/gameSounds.js";
+import { playResolveCue } from "../../shared/gameSounds.js";
 import { burstRouletteWinParticles } from "./rouletteWheelCelebration.js";
 import { ROULETTE_WHEEL_CELEBRATION_STYLES } from "./rouletteWheelCelebrationStyles.js";
 
@@ -13,6 +10,7 @@ function cx(...classes) {
 export function RouletteWheelCelebration({
   active = false,
   variant = "win",
+  playWinSting = true,
   soundEnabled = true,
   size = 560,
   children,
@@ -30,16 +28,19 @@ export function RouletteWheelCelebration({
     burstRouletteWinParticles(particlesRef.current);
 
     if (soundEnabled) {
-      playCoinReceiverWinSound();
+      playResolveCue({
+        opening: !playWinSting,
+        sting: "multiplier",
+      });
     }
-  }, [active, variant, soundEnabled]);
+  }, [active, variant, playWinSting, soundEnabled]);
 
   useEffect(() => {
     if (!active || variant !== "lose" || !soundEnabled) {
       return;
     }
 
-    playLossSound();
+    playResolveCue({ sting: "loss" });
   }, [active, variant, soundEnabled]);
 
   const rootStyle = {

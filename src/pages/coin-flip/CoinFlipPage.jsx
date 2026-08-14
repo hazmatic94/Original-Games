@@ -18,9 +18,8 @@ import {
 } from "../../shared/gameRoundEnd.jsx";
 import coinFlipSound from "../../../assets/coin-flip.mp3?url";
 import coinWhooshSound from "../../../assets/coin-whoosh.mp3?url";
-import { formatBalance } from "../../shared/formatting.js";
-import { playCashoutSound, playLossSound, playPlaceBetSound } from "../../shared/gameSounds.js";
-import { playSound } from "../../shared/sounds.js";
+import { formatBalance, sanitizeBetAmountInput } from "../../shared/formatting.js";
+import { cancelSoundCues, playCashoutSound, playFoley, playPlaceBetSound, playResolveCue, soundCue } from "../../shared/gameSounds.js";
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
@@ -69,7 +68,6 @@ export function CoinFlipPage({ onGameChange }) {
   const [isPageLoadEnter, setIsPageLoadEnter] = useState(true);
   const coinProfitAnimationRef = useRef(null);
   const coinLossResetTimeoutRef = useRef(null);
-  const coinTossSoundTimeoutRef = useRef(null);
   const lossResetHandledRef = useRef(false);
   const coinWinModalResetRef = useRef(false);
   const pendingTossRef = useRef(null);
@@ -164,9 +162,7 @@ export function CoinFlipPage({ onGameChange }) {
       if (coinLossResetTimeoutRef.current) {
         window.clearTimeout(coinLossResetTimeoutRef.current);
       }
-      if (coinTossSoundTimeoutRef.current) {
-        window.clearTimeout(coinTossSoundTimeoutRef.current);
-      }
+      cancelSoundCues();
     };
   }, []);
 
@@ -217,6 +213,7 @@ export function CoinFlipPage({ onGameChange }) {
 
   function resetCoinRound() {
     clearCoinLossResetTimer();
+    cancelSoundCues();
     lossResetHandledRef.current = false;
     setCoinRoundStatus("idle");
     setCoinResult(null);
@@ -308,7 +305,7 @@ export function CoinFlipPage({ onGameChange }) {
     setCoinProgressionKey((currentKey) => currentKey + 1);
     setCoinRoundStatus("active");
     playPlaceBetSound();
-    window.setTimeout(() => runCoinFlipAnimation(true), 60);
+    window.setTimeout(() => runCoinFlipAnimation(true), soundCue.placeBetLeadMs);
   }
 
   function handleBetAction() {
@@ -374,11 +371,16 @@ export function CoinFlipPage({ onGameChange }) {
     ]);
 
     if (didWin) {
+      playResolveCue({
+        sting: "multiplier",
+      });
       setProgressionLockingIndex(lockIndex);
     }
 
     if (!didWin) {
-      playLossSound();
+      playResolveCue({
+        sting: "loss",
+      });
       setProgressionLosingIndex(lockIndex);
       scheduleCoinLossReset();
     }
@@ -403,20 +405,12 @@ export function CoinFlipPage({ onGameChange }) {
     setTapHintVisible(false);
     setTossOutcome(result);
     setTossPhase("tossing");
-    playCoinTossSounds();
+    playCoinTossSounds({ opening: coinHistory.length === 0 });
   }
 
-  function playCoinTossSounds() {
-    if (coinTossSoundTimeoutRef.current) {
-      window.clearTimeout(coinTossSoundTimeoutRef.current);
-      coinTossSoundTimeoutRef.current = null;
-    }
-
-    playSound(coinWhooshSound);
-    coinTossSoundTimeoutRef.current = window.setTimeout(() => {
-      coinTossSoundTimeoutRef.current = null;
-      playSound(coinFlipSound);
-    }, coinTossFlipSoundDelayMs);
+  function playCoinTossSounds({ opening = false } = {}) {
+    playFoley(coinWhooshSound, { opening });
+    playFoley(coinFlipSound, { opening, delay: coinTossFlipSoundDelayMs });
   }
 
   const flipCoin = useCallback(() => {
@@ -456,7 +450,7 @@ export function CoinFlipPage({ onGameChange }) {
   function handleBetAmountInputChange(event) {
     if (isRoundLocked) return;
 
-    setBetAmount(event.currentTarget.value.replace(/\D/g, ""));
+    setBetAmount(sanitizeBetAmountInput(event.currentTarget.value));
   }
 
   function handleOddsValueChange(value) {
@@ -518,24 +512,15 @@ export function CoinFlipPage({ onGameChange }) {
             }
           >
             <div className="joker-coin-flip-betting-actions joker-betting-field-group">
-              {isMobileBettingPanel ? (
-                <MobileOddsGroup
-                  options={oddsOptions}
-                  value={displayedOddsValue}
-                  onValueChange={handleOddsValueChange}
-                  disabled={oddsDisabled}
-                />
-              ) : (
-                <OddsButtonGroup
-                  options={oddsOptions}
-                  value={displayedOddsValue}
-                  onValueChange={handleOddsValueChange}
-                  layout="stacked"
-                  showOdds
-                  disabled={oddsDisabled}
-                  ariaLabel="Coin flip choice"
-                />
-              )}
+              <OddsButtonGroup
+                options={oddsOptions}
+                value={displayedOddsValue}
+                onValueChange={handleOddsValueChange}
+                layout="stacked"
+                showOdds
+                disabled={oddsDisabled}
+                ariaLabel="Coin flip choice"
+              />
             </div>
           </BettingPanelSurface>
         }

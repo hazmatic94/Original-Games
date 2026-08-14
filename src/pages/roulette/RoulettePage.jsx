@@ -16,8 +16,8 @@ import {
   GAME_ROUND_END_STYLES,
   GameRoundEndTransition,
 } from "../../shared/gameRoundEnd.jsx";
-import { formatBalance, formatCurrency } from "../../shared/formatting.js";
-import { playCashoutSound } from "../../shared/gameSounds.js";
+import { formatBalance, formatCurrency, sanitizeBetAmountInput } from "../../shared/formatting.js";
+import { cancelSoundCues, playCashoutSound, playPlaceBetSound } from "../../shared/gameSounds.js";
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
@@ -110,6 +110,7 @@ export function RoulettePage({ onGameChange }) {
   }, []);
 
   const resetRouletteRound = useCallback(() => {
+    cancelSoundCues();
     spinRequestIdRef.current = 0;
     resolvedSpinRequestRef.current = 0;
     setRoundPhase(ROULETTE_ROUND_PHASE.IDLE);
@@ -280,6 +281,7 @@ export function RoulettePage({ onGameChange }) {
     setLockedBetAmount(betAmount);
     setBalance((currentBalance) => currentBalance - numericBetAmount);
     setInGame(true);
+    playPlaceBetSound();
     requestSpin();
   }
 
@@ -330,7 +332,7 @@ export function RoulettePage({ onGameChange }) {
       return;
     }
 
-    setBetAmount(event.currentTarget.value.replace(/\D/g, ""));
+    setBetAmount(sanitizeBetAmountInput(event.currentTarget.value));
   }
 
   function handlePlaceBetClick() {
@@ -338,8 +340,8 @@ export function RoulettePage({ onGameChange }) {
       return;
     }
 
-    playButtonClickSound();
     if (inGame) {
+      playButtonClickSound();
       handleContinueSpin();
       return;
     }
@@ -401,26 +403,17 @@ export function RoulettePage({ onGameChange }) {
             }
           >
             <div className="joker-roulette-betting-actions joker-betting-field-group">
-              {isMobileBettingPanel ? (
-                <MobileRouletteOddsGroup
-                  options={rouletteOddsOptions}
-                  value={displayedOddsValue}
-                  onValueChange={handleOddsChange}
-                  disabled={oddsDisabled}
-                />
-              ) : (
-                <OddsButtonGroup
-                  label="Bet type"
-                  options={rouletteOddsOptions}
-                  value={displayedOddsValue}
-                  onValueChange={handleOddsChange}
-                  layout="stacked"
-                  showOdds={false}
-                  showDirection={false}
-                  disabled={oddsDisabled}
-                  ariaLabel="Roulette bet choice"
-                />
-              )}
+              <OddsButtonGroup
+                label="Bet type"
+                options={rouletteOddsOptions}
+                value={displayedOddsValue}
+                onValueChange={handleOddsChange}
+                layout="stacked"
+                showOdds={false}
+                showDirection={false}
+                disabled={oddsDisabled}
+                ariaLabel="Roulette bet choice"
+              />
             </div>
           </BettingPanelSurface>
         }
@@ -497,8 +490,10 @@ export function RoulettePage({ onGameChange }) {
             celebrationVariant={celebrationVariant ?? "win"}
             onSpinComplete={handleSpinComplete}
             onSpinningChange={handleWheelSpinningChange}
+            playWinSting={streakWins.length > 1}
             spinRequestId={spinRequestId}
             wheelSessionKey={wheelSessionKey}
+            wheelSoundEnabled={streakWins.length > 0}
           />
           {bettingPanelLayout === "mobile" ? (
             <div className="joker-roulette-mobile-odds">

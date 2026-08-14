@@ -13,8 +13,10 @@ export function RouletteGameAreaSlot({
   celebrationVariant = "win",
   onSpinComplete,
   onSpinningChange,
+  playWinSting = true,
   spinRequestId,
   wheelSessionKey = 0,
+  wheelSoundEnabled = true,
 }) {
   const onSpinCompleteRef = useRef(onSpinComplete);
   const wheelRootRef = useRef(null);
@@ -73,7 +75,7 @@ export function RouletteGameAreaSlot({
     targetPocket,
     spin,
   } = useRouletteWheelSpin({
-    soundEnabled: true,
+    soundEnabled: wheelSoundEnabled,
     wheelRootRef,
     onSpinComplete: handleWheelSpinComplete,
   });
@@ -136,6 +138,7 @@ export function RouletteGameAreaSlot({
         <RouletteWheelCelebration
           active={celebrationActive}
           variant={celebrationVariant}
+          playWinSting={playWinSting}
           soundEnabled
           size={ROULETTE_WHEEL_NATIVE_WIDTH}
         >
