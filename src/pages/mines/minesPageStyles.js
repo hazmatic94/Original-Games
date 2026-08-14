@@ -36,20 +36,6 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   }
 }
 
-.joker-mines-betting-panel-host {
-  position: relative;
-  height: 100%;
-  min-height: 0;
-}
-
-.joker-mines-betting-panel-host.is-ingame .joker-mines-betting-panel-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  width: 100%;
-  box-sizing: border-box;
-}
-
 .joker-mines-dynamite-option {
   display: inline-flex;
   min-width: 0;

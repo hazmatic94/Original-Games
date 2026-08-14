@@ -1,7 +1,6 @@
 export const crashNavigationPreset = {
   defaultValue: "crash",
   game: { label: "Crash", icon: "crash" },
-  openMenuLabel: "Originals",
   selectedValue: "crash",
 };
 

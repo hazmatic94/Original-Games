@@ -1,22 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  BettingPanelSurface,
   GameShell,
-  GoldNuggetsInput,
-  MinesInGameCard,
-  MinesInGameOverlay,
-  Select,
+  MinesBettingPanel,
 } from "@joker/design-system";
 import "@joker/design-system/styles/button.css";
 import "@joker/design-system/styles/inputs.css";
-import dynamiteIconSrc from "../../../assets/mines-bomb.png?url";
 import {
   GAME_ROUND_END_RESET_MS,
   GAME_ROUND_END_STYLES,
 } from "../../shared/gameRoundEnd.jsx";
 import { formatBalance, formatCurrency, sanitizeBetAmountInput } from "../../shared/formatting.js";
 import { playCashoutSound, playPlaceBetSound, playResolveCue } from "../../shared/gameSounds.js";
-import { useDeferredWinCredit, useGameShellBettingPanelLayout, useOpenGameMenu } from "../../shared/hooks.js";
+import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
+import { gameShellNavigationProps } from "../../shared/gameShellNavigation.js";
 import { MinesGrid } from "./MinesGrid.jsx";
 import {
   desktopMinesGrid,
@@ -35,22 +31,6 @@ import {
   getTileContent,
 } from "./minesGameLogic.jsx";
 import { getMinesPageStyles } from "./minesPageStyles.js";
-
-const dynamiteIcon = <img className="joker-dynamite-icon" src={dynamiteIconSrc} alt="" />;
-
-function formatMinesAmountLabel(count) {
-  return `${count} ${count === 1 ? "Mine" : "Mines"}`;
-}
-
-function getGoldNuggets(mines, tileCount) {
-  const minesCount = Number.parseInt(mines, 10);
-
-  if (!Number.isFinite(minesCount)) {
-    return String(tileCount - 1);
-  }
-
-  return String(Math.max(0, tileCount - minesCount));
-}
 
 export function MinesPage({ onGameChange }) {
   const bettingPanelLayout = useGameShellBettingPanelLayout();
@@ -89,8 +69,6 @@ export function MinesPage({ onGameChange }) {
       ? numericBetAmount * multiplier
       : 0;
   const nextProfit = numericBetAmount * nextMultiplier;
-
-  useOpenGameMenu(minesNavigationPreset.openMenuLabel);
 
   useEffect(() => {
     return () => {
@@ -259,87 +237,35 @@ export function MinesPage({ onGameChange }) {
     setMines(String(clampTileAmount(nextValue, maxTileAmount)));
   }
 
-  const isMobileBettingPanel = bettingPanelLayout === "mobile";
-  const minesInGameCard = (
-    <MinesInGameCard
-      currentProfit={formatCurrency(currentProfit)}
-      nextValue={formatCurrency(nextProfit)}
-      currentMultiplier={`${multiplier.toFixed(2)}x`}
-      nextMultiplier={`${nextMultiplier.toFixed(2)}x`}
-    />
-  );
 
   return (
     <>
       <style>{getMinesPageStyles(GAME_ROUND_END_STYLES)}</style>
       <GameShell
-        balance={formatBalance(getDisplayBalance(balance))}
+        {...gameShellNavigationProps(minesNavigationPreset, {
+          balance: formatBalance(getDisplayBalance(balance)),
+          onGameChange,
+        })}
         className="joker-game-shell--mines"
-        defaultValue={minesNavigationPreset.defaultValue}
-        game={minesNavigationPreset.game}
-        onValueChange={onGameChange}
-        value={minesNavigationPreset.selectedValue}
         bettingPanel={
-          <div
-            className={
-              gameInPlay && !isMobileBettingPanel
-                ? "joker-mines-betting-panel-host is-ingame"
-                : "joker-mines-betting-panel-host"
-            }
-          >
-            <BettingPanelSurface
-              ariaLabel={
-                isMobileBettingPanel
-                  ? "Mines mobile betting panel"
-                  : "Mines betting panel"
-              }
-              className="joker-mines-betting-panel"
-              layout={bettingPanelLayout}
-              betAmount={betAmount}
-              onBetAmountChange={handleBetAmountChange}
-              onPlaceBet={handleBetAction}
-              inGame={gameInPlay}
-              disablePlaceBetUntilBetAmount
-              footer={
-                gameInPlay && isMobileBettingPanel ? (
-                  <MinesInGameOverlay layout={bettingPanelLayout} onCashout={handleBetAction}>
-                    {minesInGameCard}
-                  </MinesInGameOverlay>
-                ) : undefined
-              }
-            >
-              <div className="joker-mines-betting-field-group joker-betting-field-group">
-                <Select
-                  className="joker-bet-field joker-dynamite-input"
-                  fullWidth
-                  label="Dynamite"
-                  leftIcon={dynamiteIcon}
-                  options={minesAmountOptions}
-                  value={mines}
-                  onChange={handleMinesAmountChange}
-                  renderValue={(option) => {
-                    const count = Number.parseInt(option?.value ?? mines, 10);
-                    return Number.isFinite(count) ? formatMinesAmountLabel(count) : option?.label;
-                  }}
-                />
-                <GoldNuggetsInput
-                  className="joker-bet-field"
-                  fullWidth
-                  label="Gold bars"
-                  value={getGoldNuggets(mines, minesTileCount)}
-                />
-              </div>
-            </BettingPanelSurface>
-            {gameInPlay && !isMobileBettingPanel ? (
-              <MinesInGameOverlay
-                className="joker-mines-betting-panel-overlay"
-                layout={bettingPanelLayout}
-                onCashout={handleBetAction}
-              >
-                {minesInGameCard}
-              </MinesInGameOverlay>
-            ) : null}
-          </div>
+          <MinesBettingPanel
+            betAmount={betAmount}
+            disablePlaceBetUntilBetAmount
+            inGame={gameInPlay}
+            inGameCardProps={{
+              currentMultiplier: `${multiplier.toFixed(2)}x`,
+              currentProfit: formatCurrency(currentProfit),
+              nextMultiplier: `${nextMultiplier.toFixed(2)}x`,
+              nextValue: formatCurrency(nextProfit),
+            }}
+            layout={bettingPanelLayout}
+            minesAmount={mines}
+            minesAmountOptions={minesAmountOptions}
+            onBetAmountChange={handleBetAmountChange}
+            onCashout={handleBetAction}
+            onMinesAmountChange={handleMinesAmountChange}
+            onPlaceBet={handleBetAction}
+          />
         }
       >
         <MinesGrid

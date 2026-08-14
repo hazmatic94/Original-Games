@@ -7,7 +7,6 @@ export const coinTossFlipSoundDelayMs = Math.round(coinTossDurationMs * 0.065);
 export const coinFlipNavigationPreset = {
   defaultValue: "coin-flip",
   game: { label: "Coin Flip", icon: "coin-flip" },
-  openMenuLabel: "Originals",
   selectedValue: "coin-flip",
 };
 

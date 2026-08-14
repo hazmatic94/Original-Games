@@ -1,7 +1,6 @@
 export const minesNavigationPreset = {
   defaultValue: "mines",
   game: { label: "Mines", icon: "mines" },
-  openMenuLabel: "Originals",
   selectedValue: "mines",
 };
 

@@ -17,7 +17,8 @@ import {
 import { formatBalance, sanitizeBetAmountInput } from "../../shared/formatting.js";
 import { cancelSoundCues, playCashoutSound, playFoley, playPlaceBetSound, playResolveCue } from "../../shared/gameSounds.js";
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
-import { useDeferredWinCredit, useGameShellBettingPanelLayout, useOpenGameMenu } from "../../shared/hooks.js";
+import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
+import { gameShellNavigationProps } from "../../shared/gameShellNavigation.js";
 import { HiloStage } from "./HiloStage.jsx";
 import { hiloNavigationPreset } from "./hiloConfig.js";
 import {
@@ -66,8 +67,6 @@ export function HiloPage({ onGameChange }) {
     gameOdds.higherProbability
   );
   const currentProfit = multiplier > 1 ? numericBetAmount * multiplier : 0;
-
-  useOpenGameMenu(hiloNavigationPreset.openMenuLabel);
 
   useEffect(() => {
     return () => {
@@ -353,12 +352,11 @@ export function HiloPage({ onGameChange }) {
     <>
       <style>{getHiloPageStyles(GAME_ROUND_END_STYLES)}</style>
       <GameShell
-        balance={formatBalance(getDisplayBalance(balance))}
+        {...gameShellNavigationProps(hiloNavigationPreset, {
+          balance: formatBalance(getDisplayBalance(balance)),
+          onGameChange,
+        })}
         className="joker-game-shell--hilo"
-        defaultValue={hiloNavigationPreset.defaultValue}
-        game={hiloNavigationPreset.game}
-        onValueChange={onGameChange}
-        value={hiloNavigationPreset.selectedValue}
         bettingPanel={
           <div className="joker-hilo-betting-panel-host">
             <BettingPanelSurface

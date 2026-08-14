@@ -5,6 +5,7 @@ import { playCashoutSound, playLossSound, playPlaceBetSound } from "../../shared
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
+import { gameShellNavigationProps } from "../../shared/gameShellNavigation.js";
 import { PackagedCrashBettingPanel } from "./PackagedCrashBettingPanel.jsx";
 import {
   crashGraphDurationSeconds,
@@ -193,12 +194,11 @@ export function CrashPage({ onGameChange }) {
     <>
       <style>{getCrashPageStyles()}</style>
       <GameShell
-        balance={formatBalance(getDisplayBalance(balance))}
+        {...gameShellNavigationProps(crashNavigationPreset, {
+          balance: formatBalance(getDisplayBalance(balance)),
+          onGameChange,
+        })}
         className="joker-game-shell--crash"
-        defaultValue={crashNavigationPreset.defaultValue}
-        game={crashNavigationPreset.game}
-        onValueChange={onGameChange}
-        value={crashNavigationPreset.selectedValue}
         bettingPanel={
           <PackagedCrashBettingPanel
             betAmount={betAmount}

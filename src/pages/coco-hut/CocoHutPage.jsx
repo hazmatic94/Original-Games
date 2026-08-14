@@ -4,6 +4,7 @@ import cocoHutBackground from "../../../assets/cocohut-bg.png?url";
 import { formatBalance } from "../../shared/formatting.js";
 import { playPlaceBetSound } from "../../shared/gameSounds.js";
 import { useGameShellBettingPanelLayout } from "../../shared/hooks.js";
+import { gameShellNavigationProps } from "../../shared/gameShellNavigation.js";
 import { PackagedCocoHutBettingPanel } from "./PackagedCocoHutBettingPanel.jsx";
 import { cocoHutNavigationPreset } from "./cocoHutConfig.js";
 
@@ -36,12 +37,11 @@ export function CocoHutPage({ onGameChange }) {
         `}
       </style>
       <GameShell
-        balance={formatBalance(balance)}
+        {...gameShellNavigationProps(cocoHutNavigationPreset, {
+          balance: formatBalance(balance),
+          onGameChange,
+        })}
         className="joker-game-shell--coco-hut"
-        defaultValue={cocoHutNavigationPreset.defaultValue}
-        game={cocoHutNavigationPreset.game}
-        onValueChange={onGameChange}
-        value={cocoHutNavigationPreset.selectedValue}
         bettingPanel={
           <PackagedCocoHutBettingPanel
             betAmount={betAmount}

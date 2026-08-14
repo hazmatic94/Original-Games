@@ -1,7 +1,6 @@
 export const rouletteNavigationPreset = {
   defaultValue: "roulette",
   game: { label: "Roulette", icon: "roulette" },
-  openMenuLabel: "Originals",
   selectedValue: "roulette",
 };
 

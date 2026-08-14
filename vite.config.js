@@ -1,25 +1,15 @@
 import react from '@vitejs/plugin-react';
-import {existsSync, realpathSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {defineConfig} from 'vitest/config';
 
 const appBase = process.env.VERCEL ? '/' : '/showroom/gameshell/';
-const localDesignSystemRoot = fileURLToPath(
+const designSystemRoot = fileURLToPath(
   new URL('../Joker-DS', import.meta.url),
 );
-const bundledDesignSystemRoot = fileURLToPath(
-  new URL('./node_modules/@joker/design-system', import.meta.url),
-);
-const useLocalDesignSystem = existsSync(`${localDesignSystemRoot}/dist/index.js`);
-const designSystemRoot = useLocalDesignSystem
-  ? realpathSync(localDesignSystemRoot)
-  : bundledDesignSystemRoot;
 
 function isDesignSystemRouletteImporter(importer) {
   return Boolean(
-    importer &&
-      (importer.includes('/Joker-DS/dist/components/RouletteWheel/') ||
-        importer.includes('/@joker/design-system/dist/components/RouletteWheel/')),
+    importer?.includes('/@joker/design-system/dist/components/RouletteWheel/'),
   );
 }
 
@@ -93,9 +83,6 @@ function bundleDesignSystemSoundAssets() {
         return null;
       }
 
-      // Vite can only bundle `new URL()` assets when its first argument is a
-      // literal. The design-system helper hides that literal behind a function,
-      // leaving production chunks to resolve ../../assets at runtime.
       return code.replace(
         /designSystemSoundUrl\((['"])(\.\.\/\.\.\/assets\/[^'"]+)\1\)/g,
         'new URL($1$2$1, import.meta.url).href',
@@ -163,29 +150,5 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['@joker/design-system'],
-  },
-  resolve: {
-    alias: [
-      ...(useLocalDesignSystem
-        ? [
-            {
-              find: '@joker/design-system/styles.css',
-              replacement: `${designSystemRoot}/src/styles/index.css`,
-            },
-            {
-              find: /^@joker\/design-system\/styles\/(.+)$/,
-              replacement: `${designSystemRoot}/src/styles/$1`,
-            },
-            {
-              find: '@joker/design-system',
-              replacement: `${designSystemRoot}/dist/index.js`,
-            },
-            {
-              find: '../EnterBetPrecursor/index.js',
-              replacement: `${designSystemRoot}/dist/components/EnterBetPrecursor/index.js`,
-            },
-          ]
-        : []),
-    ],
   },
 });

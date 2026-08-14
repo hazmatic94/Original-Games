@@ -21,6 +21,7 @@ import { cancelSoundCues, playCashoutSound, playPlaceBetSound } from "../../shar
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
+import { gameShellNavigationProps } from "../../shared/gameShellNavigation.js";
 import { RouletteGameAreaSlot } from "./RouletteGameAreaSlot.jsx";
 import { RouletteStreakChip } from "./RouletteStreakChip.jsx";
 import {
@@ -371,13 +372,12 @@ export function RoulettePage({ onGameChange }) {
     <>
       <style>{getRoulettePageStyles(GAME_ROUND_END_STYLES)}</style>
       <GameShell
-        balance={formatBalance(getDisplayBalance(balance))}
+        {...gameShellNavigationProps(rouletteNavigationPreset, {
+          balance: formatBalance(getDisplayBalance(balance)),
+          onGameChange,
+        })}
         className="joker-game-shell--roulette"
-        defaultValue={rouletteNavigationPreset.defaultValue}
-        game={rouletteNavigationPreset.game}
         gameHeaderRail={<RouletteGameHeaderRail />}
-        onValueChange={onGameChange}
-        value={rouletteNavigationPreset.selectedValue}
         bettingPanel={
           <BettingPanelSurface
             ariaLabel={

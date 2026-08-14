@@ -23,6 +23,7 @@ import { cancelSoundCues, playCashoutSound, playFoley, playPlaceBetSound, playRe
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
 import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
+import { gameShellNavigationProps } from "../../shared/gameShellNavigation.js";
 import { MobileOddsGroup } from "./MobileOddsGroup.jsx";
 import {
   COIN_FLIP_PAGE_LOAD_ANIMATION_MS,
@@ -481,12 +482,11 @@ export function CoinFlipPage({ onGameChange }) {
     <>
       <style>{getCoinFlipPageStyles(GAME_ROUND_END_STYLES)}</style>
       <GameShell
-        balance={formatBalance(getDisplayBalance(balance))}
+        {...gameShellNavigationProps(coinFlipNavigationPreset, {
+          balance: formatBalance(getDisplayBalance(balance)),
+          onGameChange,
+        })}
         className="joker-game-shell--coin-flip"
-        defaultValue={coinFlipNavigationPreset.defaultValue}
-        game={coinFlipNavigationPreset.game}
-        onValueChange={onGameChange}
-        value={coinFlipNavigationPreset.selectedValue}
         bettingPanel={
           <BettingPanelSurface
             ariaLabel={

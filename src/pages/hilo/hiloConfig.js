@@ -1,7 +1,6 @@
 export const hiloNavigationPreset = {
   defaultValue: "hilo",
   game: { label: "Hilo", icon: "hi-lo" },
-  openMenuLabel: "Originals",
   selectedValue: "hilo",
 };
 
