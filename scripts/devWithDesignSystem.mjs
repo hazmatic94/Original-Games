@@ -80,7 +80,7 @@ const appDev = run(process.execPath, [
   '0.0.0.0',
   '--port',
   '5173',
-], {cwd: root, env: {...process.env, NODE_OPTIONS: '--preserve-symlinks'}});
+], {cwd: root, env: process.env});
 
 function shutdown() {
   designSystemBuild.kill('SIGTERM');

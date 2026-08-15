@@ -4,16 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "NODE_OPTIONS='--preserve-symlinks' node scripts/devWithDesignSystem.mjs",
-    "dev:app": "NODE_OPTIONS='--preserve-symlinks' vite --host 0.0.0.0 --port 5173",
-    "build": "NODE_OPTIONS='--preserve-symlinks' vite build",
+    "dev": "node scripts/devWithDesignSystem.mjs",
+    "dev:app": "vite --host 0.0.0.0 --port 5173",
+    "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "clean": "rm -rf dist node_modules .yarn yarn.lock && rm -f .pnp.cjs .pnp.loader.mjs"
   },
   "dependencies": {
-    "@joker/design-system": "portal:../Joker-DS",
+    "@joker/design-system": "https://github.com/hazmatic94/Joker-DS.git#main",
     "@vitejs/plugin-react": "^4.3.4",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",

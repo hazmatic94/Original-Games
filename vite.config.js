@@ -1,16 +1,57 @@
 import react from '@vitejs/plugin-react';
+import {existsSync, realpathSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {defineConfig} from 'vitest/config';
 
 const appBase = process.env.VERCEL ? '/' : '/showroom/gameshell/';
-const designSystemRoot = fileURLToPath(
+const localDesignSystemRoot = fileURLToPath(
   new URL('../Joker-DS', import.meta.url),
 );
+const bundledDesignSystemRoot = fileURLToPath(
+  new URL('./node_modules/@joker/design-system', import.meta.url),
+);
+const useLocalDesignSystem =
+  !process.env.VERCEL && existsSync(`${localDesignSystemRoot}/dist/index.js`);
+const designSystemRoot = useLocalDesignSystem
+  ? realpathSync(localDesignSystemRoot)
+  : bundledDesignSystemRoot;
 
 function isDesignSystemRouletteImporter(importer) {
   return Boolean(
-    importer?.includes('/@joker/design-system/dist/components/RouletteWheel/'),
+    importer &&
+      (importer.includes('/Joker-DS/dist/components/RouletteWheel/') ||
+        importer.includes('/@joker/design-system/dist/components/RouletteWheel/')),
   );
+}
+
+function preferLocalDesignSystem() {
+  if (!useLocalDesignSystem) {
+    return null;
+  }
+
+  return {
+    name: 'prefer-local-design-system',
+    enforce: 'pre',
+    resolveId(source) {
+      if (source === '@joker/design-system') {
+        return `${designSystemRoot}/dist/index.js`;
+      }
+
+      if (source.startsWith('@joker/design-system/styles/')) {
+        return `${designSystemRoot}/src/styles/${source.slice('@joker/design-system/styles/'.length)}`;
+      }
+
+      if (source === '@joker/design-system/styles.css') {
+        return `${designSystemRoot}/src/styles/index.css`;
+      }
+
+      if (source.startsWith('@joker/design-system/')) {
+        return `${designSystemRoot}/dist/${source.slice('@joker/design-system/'.length)}`;
+      }
+
+      return null;
+    },
+  };
 }
 
 function repairIncompleteRouletteWheelBuild() {
@@ -124,6 +165,7 @@ function redirectMissingBaseSlash() {
 export default defineConfig({
   plugins: [
     react(),
+    preferLocalDesignSystem(),
     bundleDesignSystemSoundAssets(),
     repairIncompleteRouletteWheelBuild(),
     redirectMissingBaseSlash(),
@@ -150,5 +192,29 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['@joker/design-system'],
+  },
+  resolve: {
+    alias: [
+      ...(useLocalDesignSystem
+        ? [
+            {
+              find: '@joker/design-system/styles.css',
+              replacement: `${designSystemRoot}/src/styles/index.css`,
+            },
+            {
+              find: /^@joker\/design-system\/styles\/(.+)$/,
+              replacement: `${designSystemRoot}/src/styles/$1`,
+            },
+            {
+              find: '@joker/design-system',
+              replacement: `${designSystemRoot}/dist/index.js`,
+            },
+            {
+              find: '../EnterBetPrecursor/index.js',
+              replacement: `${designSystemRoot}/dist/components/EnterBetPrecursor/index.js`,
+            },
+          ]
+        : []),
+    ],
   },
 });

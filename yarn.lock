@@ -428,14 +428,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@joker/design-system@portal:../Joker-DS::locator=game-shell%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@joker/design-system@portal:../Joker-DS::locator=game-shell%40workspace%3A."
+"@joker/design-system@https://github.com/hazmatic94/Joker-DS.git#main":
+  version: 0.1.67
+  resolution: "@joker/design-system@https://github.com/hazmatic94/Joker-DS.git#commit=eb98bb745700420a555a9242df546d1fe55cfccf"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
+  checksum: 10c0/4816f130886a6b70e37dd29327278691c5240627da5c8b9d4e7371eef3118318aedd484a00403d8b64789593152cbe4ec82ab52dff0c8337942377e1267b06e6
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "@jridgewell/gen-mapping@npm:^0.3.12, @jridgewell/gen-mapping@npm:^0.3.5":
   version: 0.3.13
@@ -1237,7 +1238,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "game-shell@workspace:."
   dependencies:
-    "@joker/design-system": "portal:../Joker-DS"
+    "@joker/design-system": "https://github.com/hazmatic94/Joker-DS.git#main"
     "@vitejs/plugin-react": "npm:^4.3.4"
     lucide-react: "npm:^0.468.0"
     react: "npm:^18.3.1"
