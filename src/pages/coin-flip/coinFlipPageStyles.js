@@ -177,9 +177,65 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   min-height: var(--coin-flip-progression-slot-height);
 }
 
+.joker-coin-flip-game-frame .joker-coin-toss-rings__ring--outer,
+.joker-coin-flip-game-frame .joker-coin-toss-rings__ring--inner,
+.joker-coin-flip-game-frame .joker-coin-toss-rings__pool,
+.joker-coin-flip-game-frame .joker-coin-toss-rings__reflection,
+.joker-coin-flip-game-frame .joker-coin-toss-rings__plane,
+.joker-coin-flip-game-frame .joker-coin-toss-rings__coin-shadow,
+.joker-coin-flip-game-frame .joker-coin-toss__glow {
+  display: none;
+}
+
+.joker-coin-flip-game-frame .joker-coin-toss__arena > .joker-coin-toss-rings {
+  display: block;
+  position: absolute;
+  right: 0;
+  bottom: var(--coin-toss-hover-base);
+  left: 0;
+  z-index: 0;
+  width: 100%;
+  height: calc(var(--coin-size) + var(--coin-toss-lift));
+  pointer-events: none;
+}
+
+.joker-coin-flip-game-frame .joker-coin-toss-rings {
+  width: 100%;
+  height: 100%;
+}
+
+.joker-coin-flip-game-frame .joker-coin-toss-rings__surface {
+  position: absolute;
+  inset: 0;
+}
+
+.joker-coin-flip-game-frame .joker-coin-toss-rings__particles,
+.joker-coin-flip-game-frame .joker-coin-toss__particles {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+.joker-coin-flip-game-frame .joker-coin-toss-rings__particles {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
 .joker-coin-flip-game-frame .joker-coin-toss__tap-target,
 .joker-coin-flip-game-frame .joker-coin-toss__arena {
   margin-inline: auto;
+}
+
+.joker-coin-flip-game-frame .joker-coin-toss__arena {
+  height: calc(
+    var(--coin-toss-hover-base) + var(--coin-toss-hover-bob) +
+      var(--coin-size) + var(--coin-toss-lift)
+  );
+}
+
+.joker-coin-flip-game-frame .joker-coin-toss__playfield {
+  bottom: var(--coin-toss-hover-base);
 }
 
 .joker-coin-flip-game-frame .joker-coin-toss-demo__hint {
@@ -244,7 +300,13 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
 }
 
 .joker-coin-flip-game-frame.is-page-load-enter .joker-coin-toss__playfield {
-  animation: joker-coin-flip-load-coin-land 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  opacity: 0;
+  animation: joker-coin-flip-load-coin-enter 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.joker-coin-flip-game-frame.is-page-load-enter .joker-coin-toss-rings__particles {
+  opacity: 0;
+  animation: joker-coin-flip-load-fade-in 300ms var(--ease-out) 280ms forwards;
 }
 
 .joker-coin-flip-game-frame.is-page-load-enter .joker-coin-toss-demo__hint {
@@ -256,26 +318,41 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   pointer-events: none;
 }
 
-@keyframes joker-coin-flip-load-coin-land {
+@keyframes joker-coin-flip-load-coin-enter {
   0% {
-    transform: translateX(-50%) translateY(-30px);
+    opacity: 0;
+    transform: translateX(-50%) translateY(-40px);
   }
 
-  74% {
-    transform: translateX(-50%) translateY(3px);
+  55% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(6px);
   }
 
-  88% {
+  78% {
+    opacity: 1;
     transform: translateX(-50%) translateY(-2px);
   }
 
   100% {
+    opacity: 1;
     transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes joker-coin-flip-load-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .joker-coin-flip-game-frame.is-page-load-enter .joker-coin-toss__playfield,
+  .joker-coin-flip-game-frame.is-page-load-enter .joker-coin-toss-rings__particles,
   .joker-coin-flip-game-frame.is-page-load-enter .joker-coin-toss-demo__hint {
     animation: none;
     opacity: 1;

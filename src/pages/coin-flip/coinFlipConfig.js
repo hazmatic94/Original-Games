@@ -12,4 +12,4 @@ export const coinFlipNavigationPreset = {
 
 export const COIN_FLIP_PROGRESSION_RECEIVER_SIZE = 72;
 export const COIN_FLIP_PROGRESSION_COIN_SIZE = Math.round(COIN_FLIP_PROGRESSION_RECEIVER_SIZE * 0.76);
-export const COIN_FLIP_PAGE_LOAD_ANIMATION_MS = 480;
+export const COIN_FLIP_PAGE_LOAD_ANIMATION_MS = 640;

@@ -12,6 +12,7 @@ import "@joker/design-system/styles/button.css";
 import "@joker/design-system/styles/inputs.css";
 import "@joker/design-system/styles/coin.css";
 import "@joker/design-system/styles/coin-toss.css";
+import "@joker/design-system/styles/coin-toss-rings.css";
 import {
   GAME_ROUND_END_STYLES,
   GameRoundEndTransition,
