@@ -13,7 +13,7 @@
     "clean": "rm -rf dist node_modules package-lock.json"
   },
   "dependencies": {
-    "@joker/design-system": "https://github.com/hazmatic94/Joker-DS.git#main",
+    "@joker/design-system": "github:hazmatic94/Joker-DS#main",
     "@vitejs/plugin-react": "^4.3.4",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
