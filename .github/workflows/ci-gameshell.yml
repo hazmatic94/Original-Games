@@ -21,18 +21,15 @@ jobs:
         with:
           node-version: 20
 
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Configure private repo access
         run: |
           git config --global url."https://x-access-token:${{ secrets.PRIVATE_REPO_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
       - name: Install dependencies
-        run: yarn install --no-immutable
+        run: npm ci
 
       - name: Test GameShell
-        run: yarn build
+        run: npm test
 
       - name: Build GameShell
-        run: yarn build
+        run: npm run build
