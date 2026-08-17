@@ -4,7 +4,7 @@ import { formatBalance, formatCurrency } from "../../shared/formatting.js";
 import { playCashoutSound, playLossSound, playPlaceBetSound } from "../../shared/gameSounds.js";
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
-import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
+import { useDeferredWinCredit, useGameShellBettingPanelLayout, useScrollMobilePlayAreaOnBet } from "../../shared/hooks.js";
 import { gameShellNavigationProps } from "../../shared/gameShellNavigation.js";
 import { PackagedCrashBettingPanel } from "./PackagedCrashBettingPanel.jsx";
 import {
@@ -44,6 +44,7 @@ export function CrashPage({ onGameChange }) {
   const crashStartRef = useRef(0);
   const crashFrameRef = useRef(null);
   const bettingPanelLayout = useGameShellBettingPanelLayout();
+  useScrollMobilePlayAreaOnBet(roundStatus === "active");
   const numericBetAmount = Number(betAmount) || 0;
   const hasBetAmount = numericBetAmount > 0;
   const crashGraph = buildCrashGraphPaths(crashRound.elapsedMs, crashRound.crashPoint);

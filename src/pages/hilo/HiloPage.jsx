@@ -17,7 +17,7 @@ import {
 import { formatBalance, sanitizeBetAmountInput } from "../../shared/formatting.js";
 import { cancelSoundCues, playCashoutSound, playFoley, playPlaceBetSound, playResolveCue } from "../../shared/gameSounds.js";
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
-import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
+import { useDeferredWinCredit, useGameShellBettingPanelLayout, requestScrollMobilePlayAreaIntoView } from "../../shared/hooks.js";
 import { gameShellNavigationProps } from "../../shared/gameShellNavigation.js";
 import { HiloStage } from "./HiloStage.jsx";
 import { hiloNavigationPreset } from "./hiloConfig.js";
@@ -185,6 +185,7 @@ export function HiloPage({ onGameChange }) {
     setHiloWinModal(null);
 
     playPlaceBetSound();
+    requestScrollMobilePlayAreaIntoView();
 
     const nextRound = createHiloRound(currentCard);
 

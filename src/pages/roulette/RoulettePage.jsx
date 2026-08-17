@@ -20,7 +20,7 @@ import { formatBalance, formatCurrency, sanitizeBetAmountInput } from "../../sha
 import { cancelSoundCues, playCashoutSound, playPlaceBetSound } from "../../shared/gameSounds.js";
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
-import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
+import { useDeferredWinCredit, useGameShellBettingPanelLayout, requestScrollMobilePlayAreaIntoView } from "../../shared/hooks.js";
 import { gameShellNavigationProps } from "../../shared/gameShellNavigation.js";
 import { RouletteGameAreaSlot } from "./RouletteGameAreaSlot.jsx";
 import { RouletteStreakChip } from "./RouletteStreakChip.jsx";
@@ -283,6 +283,7 @@ export function RoulettePage({ onGameChange }) {
     setBalance((currentBalance) => currentBalance - numericBetAmount);
     setInGame(true);
     playPlaceBetSound();
+    requestScrollMobilePlayAreaIntoView();
     requestSpin();
   }
 

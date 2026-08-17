@@ -23,7 +23,7 @@ import { formatBalance, sanitizeBetAmountInput } from "../../shared/formatting.j
 import { cancelSoundCues, playCashoutSound, playFoley, playPlaceBetSound, playResolveCue, soundCue } from "../../shared/gameSounds.js";
 import { GameWinModalCard } from "../../shared/GameWinModalCard.jsx";
 import { GameWinModalOverlay } from "../../shared/GameWinModalOverlay.jsx";
-import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
+import { useDeferredWinCredit, useGameShellBettingPanelLayout, requestScrollMobilePlayAreaIntoView } from "../../shared/hooks.js";
 import { gameShellNavigationProps } from "../../shared/gameShellNavigation.js";
 import { MobileOddsGroup } from "./MobileOddsGroup.jsx";
 import {
@@ -307,6 +307,7 @@ export function CoinFlipPage({ onGameChange }) {
     setCoinProgressionKey((currentKey) => currentKey + 1);
     setCoinRoundStatus("active");
     playPlaceBetSound();
+    requestScrollMobilePlayAreaIntoView();
     window.setTimeout(() => runCoinFlipAnimation(true), soundCue.placeBetLeadMs);
   }
 

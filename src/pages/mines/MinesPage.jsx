@@ -11,7 +11,7 @@ import {
 } from "../../shared/gameRoundEnd.jsx";
 import { formatBalance, formatCurrency, sanitizeBetAmountInput } from "../../shared/formatting.js";
 import { playCashoutSound, playPlaceBetSound, playResolveCue } from "../../shared/gameSounds.js";
-import { useDeferredWinCredit, useGameShellBettingPanelLayout } from "../../shared/hooks.js";
+import { useDeferredWinCredit, useGameShellBettingPanelLayout, useScrollMobilePlayAreaOnBet } from "../../shared/hooks.js";
 import { gameShellNavigationProps } from "../../shared/gameShellNavigation.js";
 import { MinesGrid } from "./MinesGrid.jsx";
 import {
@@ -60,6 +60,7 @@ export function MinesPage({ onGameChange }) {
   const activeMineCount = clampTileAmount(mines, maxTileAmount);
   const safeRevealedCount = countSafeReveals(board, revealedTiles);
   const gameInPlay = roundStatus === "active";
+  useScrollMobilePlayAreaOnBet(gameInPlay);
   const multiplier = calculateMultiplier(minesTileCount, activeMineCount, safeRevealedCount);
   const nextMultiplier = calculateMultiplier(minesTileCount, activeMineCount, safeRevealedCount + 1);
   const numericBetAmount = Number(betAmount) || 0;

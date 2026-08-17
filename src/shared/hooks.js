@@ -31,6 +31,49 @@ export function useGameShellBettingPanelLayout() {
   return layout;
 }
 
+const MOBILE_SHELL_SCROLLER = ".joker-navigation-mobile-content";
+const GAME_HEADER_RAIL = ".joker-game-header-rail";
+
+function scrollMobilePlayAreaIntoView() {
+  const scroller = document.querySelector(MOBILE_SHELL_SCROLLER);
+  const rail = scroller?.querySelector(GAME_HEADER_RAIL);
+  if (!scroller || !rail) return;
+
+  const nextTop =
+    scroller.scrollTop +
+    rail.getBoundingClientRect().bottom -
+    scroller.getBoundingClientRect().top;
+
+  scroller.scrollTo({
+    top: Math.max(0, nextTop),
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+  });
+}
+
+/** After Place Bet on mobile, tuck the game header rail under the sticky nav so canvas + cashout fill the view. */
+export function requestScrollMobilePlayAreaIntoView() {
+  if (typeof window === "undefined" || !window.matchMedia?.(gameShellMobilePanelQuery).matches) {
+    return;
+  }
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(scrollMobilePlayAreaIntoView);
+  });
+}
+
+/** After Place Bet on mobile, tuck the game header rail under the sticky nav so canvas + cashout fill the view. */
+export function useScrollMobilePlayAreaOnBet(isInPlay) {
+  const wasInPlayRef = useRef(Boolean(isInPlay));
+
+  useEffect(() => {
+    const started = Boolean(isInPlay) && !wasInPlayRef.current;
+    wasInPlayRef.current = Boolean(isInPlay);
+    if (!started) return undefined;
+    requestScrollMobilePlayAreaIntoView();
+    return undefined;
+  }, [isInPlay]);
+}
+
 export function useDeferredWinCredit(setBalance) {
   const pendingWinCreditRef = useRef(0);
   const [pendingWinCredit, setPendingWinCredit] = useState(0);
