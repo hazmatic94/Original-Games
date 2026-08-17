@@ -17,11 +17,6 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   justify-self: stretch;
 }
 
-.joker-hilo-betting-panel-host {
-  height: 100%;
-  min-height: 0;
-}
-
 .joker-hilo-betting-panel.is-hilo-pre-game .joker-hilo-betting-actions {
   cursor: not-allowed;
 }
@@ -114,7 +109,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   --hilo-felt-padding-block-end: var(--spacing-24);
   --hilo-play-to-felt-width-ratio: 0.896;
   --hilo-play-to-felt-height-ratio: 0.84;
-  --hilo-mini-scale-factor: 0.58;
+  --hilo-mini-scale-factor: 0.72;
   --hilo-mini-native-width: 110px;
   --hilo-mini-native-height: 76px;
   --hilo-history-chip-height: 30px;
@@ -851,7 +846,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
 
 @media (max-width: 999px) {
   .joker-hilo-stage {
-    --hilo-history-mini-mobile-scale: 0.7;
+    --hilo-history-mini-mobile-scale: 0.88;
     --hilo-mobile-odds-reserve: 52px;
     --hilo-mobile-main-status-room: 48px;
     --hilo-mobile-main-fit-height: 446.5px;
@@ -922,7 +917,6 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   }
 
   .joker-hilo-history-rail {
-    --hilo-history-chip-height: 22px;
     align-items: center;
     justify-content: flex-start;
     flex: 0 0 auto;
@@ -963,9 +957,6 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   }
 
   .joker-hilo-history-entry .joker-hilo-history-chip {
-    height: var(--hilo-history-chip-height);
-    padding-inline: var(--spacing-4);
-    font-size: var(--text-body-12);
     transform: translate(-50%, -50%);
   }
 
@@ -1140,6 +1131,20 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
 
   .joker-game-shell--hilo .joker-hilo-betting-panel .joker-odds-button-group:not(.is-inline) {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel > .joker-betting-submit-group {
+    order: 1;
+  }
+
+  .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel > .joker-betting-divider {
+    order: 2;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel > .joker-betting-main {
+    order: 3;
   }
 }
 

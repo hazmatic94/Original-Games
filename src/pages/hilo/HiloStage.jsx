@@ -131,12 +131,8 @@ export function HiloStage({
                     card={currentCard}
                     key={currentCard.id}
                     onSkipCard={onSkipCard}
-                    showSkipButton={
-                      bettingPanelLayout === "mobile" || (roundStatus === "active" && skipAvailable)
-                    }
-                    skipDisabled={
-                      roundStatus === "pre-game" ? false : roundStatus !== "active" || !skipAvailable
-                    }
+                    showSkipButton={roundStatus === "active" && skipAvailable}
+                    skipDisabled={roundStatus !== "active" || !skipAvailable}
                   >
                     <h3 className="joker-hilo-game-frame__status">
                       CARD <strong>{history.length}</strong> OF <strong>{cardTotal}</strong>

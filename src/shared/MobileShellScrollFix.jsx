@@ -105,28 +105,6 @@ export function MobileShellScrollFix() {
           width: 100%;
         }
 
-        @media (max-width: 999px) {
-          .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel {
-            display: grid;
-            grid-template-rows: minmax(0, 1fr) auto;
-            align-content: start;
-            gap: 0;
-            padding: var(--spacing-24);
-          }
-
-          .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel > .joker-betting-main {
-            order: 1;
-          }
-
-          .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel > .joker-betting-footer-actions {
-            order: 2;
-          }
-
-          .joker-game-shell--hilo .joker-navigation-mobile-content .joker-hilo-betting-panel .joker-betting-main {
-            gap: var(--spacing-24);
-          }
-
-        }
       `}
     </style>
   );

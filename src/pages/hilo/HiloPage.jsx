@@ -358,23 +358,22 @@ export function HiloPage({ onGameChange }) {
         })}
         className="joker-game-shell--hilo"
         bettingPanel={
-          <div className="joker-hilo-betting-panel-host">
-            <BettingPanelSurface
-              ariaLabel={
-                isMobileBettingPanel ? "HiLo mobile betting panel" : "HiLo betting panel"
-              }
-              className={panelClassName}
-              layout="desktop"
-              betAmount={betAmount}
-              onBetAmountChange={handleBetAmountInputChange}
-              onPlaceBet={handlePlaceBet}
-              disablePlaceBetUntilBetAmount
-              footer={
-                gameInPlay ? <CashoutFooter onCashout={handleCashout} /> : undefined
-              }
-            >
+          <BettingPanelSurface
+            ariaLabel={
+              isMobileBettingPanel ? "HiLo mobile betting panel" : "HiLo betting panel"
+            }
+            className={panelClassName}
+            layout={bettingPanelLayout}
+            betAmount={betAmount}
+            onBetAmountChange={handleBetAmountInputChange}
+            onPlaceBet={handlePlaceBet}
+            disablePlaceBetUntilBetAmount
+            footer={
+              gameInPlay ? <CashoutFooter onCashout={handleCashout} /> : undefined
+            }
+          >
+            <div className="joker-hilo-betting-actions joker-betting-field-group">
               <OddsButtonGroup
-                className="joker-hilo-betting-actions"
                 ariaLabel="HiLo choice"
                 layout="stacked"
                 showOdds={false}
@@ -413,8 +412,8 @@ export function HiloPage({ onGameChange }) {
                   {skipAvailable ? "Skip Card" : "Skip Used"}
                 </Button>
               ) : null}
-            </BettingPanelSurface>
-          </div>
+            </div>
+          </BettingPanelSurface>
         }
       >
         <HiloStage

@@ -86,16 +86,30 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   overflow: visible;
 }
 
-.joker-game-shell .joker-navigation-mobile-content .joker-mines-stage {
-  height: 100%;
-  min-height: 100%;
-  overflow: visible;
-}
-
+.joker-game-shell .joker-navigation-mobile-content .joker-mines-stage,
 .joker-game-shell .joker-navigation-mobile-content .joker-mines-board-area {
+  width: 100%;
   height: 100%;
+  max-height: 100%;
   min-height: 0;
   overflow: visible;
+  contain: size;
+}
+
+.joker-game-shell--mines .joker-navigation-mobile-content .joker-game-inner-canvas {
+  position: relative;
+  z-index: 4;
+  overflow: visible;
+  contain: size;
+  width: 100%;
+  height: var(--game-shell-mobile-stage-height);
+  min-height: var(--game-shell-mobile-stage-height);
+  max-height: var(--game-shell-mobile-stage-height);
+}
+
+.joker-game-shell--mines .joker-navigation-mobile-content .joker-game-inner-betting {
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 1000px) {
@@ -198,6 +212,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   min-width: 0;
   min-height: 0;
   overflow: visible;
+  contain: size;
   place-items: stretch;
 }
 
@@ -207,6 +222,7 @@ ${GAME_WIN_MODAL_OVERLAY_STYLES}
   height: 100%;
   max-width: 100%;
   max-height: 100%;
+  contain: size;
 }
 
 .joker-mines-grid.is-round-lost .joker-mines-grid-cell:not(.is-revealed) .joker-mines-grid-tile {
