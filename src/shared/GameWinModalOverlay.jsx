@@ -17,18 +17,6 @@ export const GAME_WIN_MODAL_OVERLAY_STYLES = `
     position: relative;
     z-index: 1;
     max-width: min(500px, calc(100% - var(--spacing-48)));
-    box-shadow: 0 var(--spacing-24) var(--spacing-64) rgb(0 0 0 / 0.48);
-  }
-
-  .joker-game-win-modal-overlay video {
-    background: transparent;
-    border: 0;
-    outline: 0;
-    box-shadow: none;
-    object-fit: cover;
-    mix-blend-mode: screen;
-    -webkit-mask-image: -webkit-radial-gradient(circle, #fff 99.5%, transparent 100%);
-    mask-image: radial-gradient(circle, #fff 99.5%, transparent 100%);
   }
 
   @keyframes joker-game-win-modal-overlay-in {

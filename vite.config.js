@@ -171,6 +171,7 @@ export default defineConfig({
     redirectMissingBaseSlash(),
   ],
   base: appBase,
+  assetsInclude: ["**/*.mov"],
   test: {
     environment: 'node',
     include: ['src/**/*.test.{js,jsx}'],
